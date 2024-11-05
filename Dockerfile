@@ -9,19 +9,21 @@ COPY cmd ./cmd/
 COPY internal ./internal/
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o main cmd/main.go
+RUN addgroup -S app && adduser -S app -G app
 
 CMD ["./main"]
 
 
-FROM alpine
+FROM scratch
 
 EXPOSE 8080
 
-RUN addgroup -S app && adduser -S app -G app
-
 WORKDIR /app
 
-COPY --chown=app:app --from=builder /app/main /app/main
+COPY --from=builder /app/main /app/main
+COPY --from=0 /etc/passwd /etc/passwd
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+USER app
 
 USER app
 
