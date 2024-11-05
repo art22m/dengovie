@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS users
 CREATE TABLE IF NOT EXISTS chats
 (
     chat_id     BIGSERIAL,
+    tg_chat_id  TEXT                     NOT NULL,
     description TEXT                     NOT NULL DEFAULT '',
     created_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
