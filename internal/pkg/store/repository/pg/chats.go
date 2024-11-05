@@ -35,7 +35,7 @@ func (r *ChatsRepo) Delete(ctx context.Context, id int64) (bool, error) {
 }
 
 func (r *ChatsRepo) GetByTelegramChatID(ctx context.Context, id string) (*models.Chat, error) {
-	q := "SELECT * FROM chats WHERE chat_id = $1"
+	q := "SELECT chat_id, tg_chat_id, description, created_at FROM chats WHERE chat_id = $1"
 	var u models.Chat
 	err := r.db.Get(ctx, &u, q, id)
 	if err == sql.ErrNoRows {

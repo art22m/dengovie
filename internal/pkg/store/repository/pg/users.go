@@ -35,7 +35,7 @@ func (r *UsersRepo) Delete(ctx context.Context, id int64) (bool, error) {
 }
 
 func (r *UsersRepo) GetByTelegramUserID(ctx context.Context, id string) (*models.User, error) {
-	q := "SELECT * FROM users WHERE user_id = $1"
+	q := "SELECT user_id, tg_user_id, phone_number, tg_alias, created_at FROM users WHERE user_id = $1"
 	var u models.User
 	err := r.db.Get(ctx, &u, q, id)
 	if err == sql.ErrNoRows {
