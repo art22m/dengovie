@@ -6,7 +6,6 @@ require (
 	github.com/georgysavva/scany/v2 v2.1.3
 	github.com/go-jet/jet/v2 v2.12.0
 	github.com/jackc/pgx/v5 v5.7.1
-	github.com/pkg/errors v0.9.1
 )
 
 require (
