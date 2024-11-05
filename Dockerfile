@@ -19,11 +19,14 @@ EXPOSE 8080
 
 WORKDIR /app
 
+# copy binary execution file
 COPY --from=builder /app/main /app/main
+# copy "app" user
 COPY --from=0 /etc/passwd /etc/passwd
+# copy certificates as scratch base image does not have them
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-USER app
 
+# go away from root
 USER app
 
 CMD ["./main"]
