@@ -4,21 +4,22 @@ import (
 	"context"
 	"time"
 
-	"github.com/art22m/dengovie/internal/generated/dengovie/dengovie/public/model"
-	"github.com/art22m/dengovie/internal/generated/dengovie/dengovie/public/table"
-	"github.com/art22m/dengovie/internal/pkg/models"
-	"github.com/art22m/dengovie/internal/pkg/store"
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/jackc/pgx/v5"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
+
+	"github.com/art22m/dengovie/internal/generated/dengovie/dengovie/public/model"
+	"github.com/art22m/dengovie/internal/generated/dengovie/dengovie/public/table"
+	"github.com/art22m/dengovie/internal/pkg/models"
+	"github.com/art22m/dengovie/internal/pkg/store"
 )
 
 type DebtRepository struct {
 	db store.DatabaseOperations
 }
 
-func NewDebtRepository(db store.DatabaseOperations) *DebtRepository {
+func NewDebts(db store.DatabaseOperations) *DebtRepository {
 	return &DebtRepository{
 		db: db,
 	}
