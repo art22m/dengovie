@@ -8,14 +8,12 @@ import (
 
 type UsersRepo interface {
 	Create(ctx context.Context, user *models.User) error
-	Update(ctx context.Context, user *models.User) (bool, error)
 	Delete(ctx context.Context, id int64) (bool, error)
 	GetByTelegramUserID(ctx context.Context, id string) (*models.User, error)
 }
 
 type ChatsRepo interface {
 	Create(ctx context.Context, chat *models.Chat) error
-	Update(ctx context.Context, chat *models.Chat) (bool, error)
 	Delete(ctx context.Context, id int64) (bool, error)
 	GetByTelegramChatID(ctx context.Context, id string) (*models.Chat, error)
 }

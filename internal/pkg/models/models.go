@@ -6,7 +6,7 @@ type User struct {
 	UserID         int64     `json:"user_id" db:"user_id"`
 	TelegramUserID string    `json:"tg_user_id" db:"tg_user_id"`
 	PhoneNumber    string    `json:"phone_number" db:"phone_number"`
-	TelegramAlias  string    `json:"tg_alias" db:"tg_alias"`
+	TelegramAlias  *string   `json:"tg_alias" db:"tg_alias"`
 	CreatedAt      time.Time `json:"created_at" db:"created_at"`
 }
 
