@@ -22,7 +22,7 @@ type ChatsRepo interface {
 
 type DebtsRepo interface {
 	Create(ctx context.Context, chat *models.Debt) error
-	Read(ctx context.Context) ([]*models.Debt, error)
+	List(ctx context.Context) ([]*models.Debt, error)
 	Update(ctx context.Context, chat *models.Debt) (bool, error)
 	Delete(ctx context.Context, id int64) (bool, error)
 }
@@ -30,7 +30,7 @@ type DebtsRepo interface {
 type EventsRepo interface {
 	Create(ctx context.Context, chat *models.Event) error
 	List(ctx context.Context) ([]*models.Event, error)
-	ReadByCollectorID(ctx context.Context, id int64) ([]*models.Event, error)
-	ReadByDebtorID(ctx context.Context, id int64) ([]*models.Event, error)
-	ReadByChatID(ctx context.Context, id int64) ([]*models.Event, error)
+	ListByCollectorID(ctx context.Context, id int64) ([]*models.Event, error)
+	ListByDebtorID(ctx context.Context, id int64) ([]*models.Event, error)
+	ListByChatID(ctx context.Context, id int64) ([]*models.Event, error)
 }
