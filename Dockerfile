@@ -13,7 +13,6 @@ RUN addgroup -S app && adduser -S app -G app
 
 CMD ["./main"]
 
-
 FROM scratch
 
 EXPOSE 8080
