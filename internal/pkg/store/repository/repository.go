@@ -21,14 +21,14 @@ type ChatsRepo interface {
 }
 
 type DebtsRepo interface {
-	Create(ctx context.Context, chat *models.Debt) error
+	Create(ctx context.Context, debt *models.Debt) error
 	List(ctx context.Context) ([]*models.Debt, error)
-	Update(ctx context.Context, chat *models.Debt) (bool, error)
+	Update(ctx context.Context, debt *models.Debt) (bool, error)
 	Delete(ctx context.Context, id int64) (bool, error)
 }
 
 type EventsRepo interface {
-	Create(ctx context.Context, chat *models.Event) error
+	Create(ctx context.Context, event *models.Event) error
 	List(ctx context.Context) ([]*models.Event, error)
 	ListByCollectorID(ctx context.Context, id int64) ([]*models.Event, error)
 	ListByDebtorID(ctx context.Context, id int64) ([]*models.Event, error)
