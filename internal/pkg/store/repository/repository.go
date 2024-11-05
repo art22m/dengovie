@@ -20,9 +20,11 @@ type ChatsRepo interface {
 
 type DebtsRepo interface {
 	Create(ctx context.Context, debt *models.Debt) error
-	List(ctx context.Context) ([]*models.Debt, error)
+	ListByChatID(ctx context.Context, chatID int64) ([]*models.Debt, error)
+	ListByCollectorID(ctx context.Context, collectorID int64) ([]*models.Debt, error)
+	ListByDebtorID(ctx context.Context, debtorID int64) ([]*models.Debt, error)
 	Update(ctx context.Context, debt *models.Debt) (bool, error)
-	Delete(ctx context.Context, id int64) (bool, error)
+	Delete(ctx context.Context, collectorID, debtorID, chatID int64) (bool, error)
 }
 
 type EventsRepo interface {
