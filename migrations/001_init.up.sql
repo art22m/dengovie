@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS users
     user_id      BIGSERIAL,
     tg_user_id   TEXT                     NOT NULL,
     phone_number TEXT                     NOT NULL,
-    tg_alias     TEXT,
+    tg_alias     TEXT                     NOT NULL DEFAULT '',
     created_at   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (user_id)
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS users
 CREATE TABLE IF NOT EXISTS chats
 (
     chat_id     BIGSERIAL,
-    description TEXT,
+    description TEXT                     NOT NULL DEFAULT '',
     created_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (chat_id)
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS events
     debtor_id    BIGSERIAL,
     chat_id      BIGSERIAL,
     amount       BIGINT                            DEFAULT 0,
-    description  TEXT,
+    description  TEXT                     NULL     DEFAULT '',
     created_at   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (event_id)
