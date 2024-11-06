@@ -2,7 +2,6 @@ package pg
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/art22m/dengovie/internal/pkg/models"
 	"github.com/art22m/dengovie/internal/pkg/store"
@@ -36,10 +35,13 @@ func (r *ChatsRepo) Delete(ctx context.Context, id int64) (bool, error) {
 
 func (r *ChatsRepo) GetByTelegramChatID(ctx context.Context, id string) (*models.Chat, error) {
 	q := "SELECT chat_id, tg_chat_id, description, created_at FROM chats WHERE chat_id = $1"
-	var u models.Chat
-	err := r.db.Get(ctx, &u, q, id)
-	if err == sql.ErrNoRows {
+	chats := make([]*models.Chat, 0)
+	err := r.db.Select(ctx, &chats, q, id)
+	if err != nil {
+		return nil, err
+	}
+	if len(chats) == 0 {
 		return nil, store.ChatNotFound
 	}
-	return &u, err
+	return chats[0], err
 }

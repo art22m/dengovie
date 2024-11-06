@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5"
+
 	"github.com/art22m/dengovie/internal/pkg/models"
 )
 
@@ -19,16 +21,19 @@ type ChatsRepo interface {
 }
 
 type DebtsRepo interface {
-	Create(ctx context.Context, debt *models.Debt) error
 	ListByChatID(ctx context.Context, chatID int64) ([]*models.Debt, error)
 	ListByCollectorID(ctx context.Context, collectorID int64) ([]*models.Debt, error)
 	ListByDebtorID(ctx context.Context, debtorID int64) ([]*models.Debt, error)
-	Update(ctx context.Context, debt *models.Debt) (bool, error)
 	Delete(ctx context.Context, collectorID, debtorID, chatID int64) (bool, error)
+
+	CreateTX(ctx context.Context, tx pgx.Tx, debt *models.Debt) error
+	GetTX(ctx context.Context, tx pgx.Tx, collectorID, debtorID, chatID int64) (*models.Debt, error)
+	UpdateTX(ctx context.Context, tx pgx.Tx, debt *models.Debt) (bool, error)
 }
 
 type EventsRepo interface {
 	Create(ctx context.Context, event *models.Event) error
+	CreateTX(ctx context.Context, tx pgx.Tx, event *models.Event) error
 	List(ctx context.Context) ([]*models.Event, error)
 	ListByCollectorID(ctx context.Context, id int64) ([]*models.Event, error)
 	ListByDebtorID(ctx context.Context, id int64) ([]*models.Event, error)

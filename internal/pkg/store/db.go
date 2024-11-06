@@ -11,9 +11,12 @@ import (
 
 type DatabaseOperations interface {
 	Select(ctx context.Context, dest interface{}, query string, args ...interface{}) error
-	Get(ctx context.Context, dest interface{}, query string, args ...interface{}) error
+	SelectTX(ctx context.Context, tx pgx.Tx, dest interface{}, query string, args ...interface{}) error
+
 	Exec(ctx context.Context, query string, args ...interface{}) (pgconn.CommandTag, error)
+	ExecTX(ctx context.Context, tx pgx.Tx, query string, args ...interface{}) (pgconn.CommandTag, error)
 	ExecQueryRow(ctx context.Context, query string, args ...interface{}) pgx.Row
+
 	GetPool() *pgxpool.Pool
 }
 
@@ -37,8 +40,16 @@ func (db *Database) Select(ctx context.Context, dest interface{}, query string, 
 	return pgxscan.Select(ctx, db.cluster, dest, query, args...)
 }
 
+func (db *Database) SelectTX(ctx context.Context, tx pgx.Tx, dest interface{}, query string, args ...interface{}) error {
+	return pgxscan.Select(ctx, tx, dest, query, args...)
+}
+
 func (db *Database) Exec(ctx context.Context, query string, args ...interface{}) (pgconn.CommandTag, error) {
 	return db.cluster.Exec(ctx, query, args...)
+}
+
+func (db *Database) ExecTX(ctx context.Context, tx pgx.Tx, query string, args ...interface{}) (pgconn.CommandTag, error) {
+	return tx.Exec(ctx, query, args...)
 }
 
 func (db *Database) ExecQueryRow(ctx context.Context, query string, args ...interface{}) pgx.Row {

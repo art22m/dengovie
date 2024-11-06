@@ -3,6 +3,8 @@ package pg
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5"
+
 	"github.com/art22m/dengovie/internal/pkg/models"
 	"github.com/art22m/dengovie/internal/pkg/store"
 )
@@ -18,10 +20,19 @@ func NewEvents(db store.DatabaseOperations) *EventsRepo {
 }
 
 func (r *EventsRepo) Create(ctx context.Context, event *models.Event) error {
-	q := "INSERT INTO events(event_id, collector_id, debtor_id, chat_id, amount, description) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING"
+	q := "INSERT INTO events(collector_id, debtor_id, chat_id, amount, description) VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING"
 	_, err := r.db.Exec(
 		ctx, q,
 		event.EventID, event.CollectorID, event.DebtorID, event.ChatID, event.Amount, event.Description,
+	)
+	return err
+}
+
+func (r *EventsRepo) CreateTX(ctx context.Context, tx pgx.Tx, event *models.Event) error {
+	q := "INSERT INTO events(collector_id, debtor_id, chat_id, amount, description) VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING"
+	_, err := r.db.ExecTX(
+		ctx, tx, q,
+		event.CollectorID, event.DebtorID, event.ChatID, event.Amount, event.Description,
 	)
 	return err
 }

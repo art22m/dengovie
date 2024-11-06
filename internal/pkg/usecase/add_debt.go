@@ -1,95 +1,92 @@
 package usecase
 
-//
-//import (
-//	"context"
-//	"time"
-//
-//	"github.com/jackc/pgx/v5"
-//	"github.com/pkg/errors"
-//	"github.com/samber/lo"
-//
-//	"github.com/art22m/dengovie/internal/generated/dengovie/dengovie/public/model"
-//)
-//
-//type AddDebtRequest struct {
-//	CollectorID int64
-//	DebtorID    int64
-//	ChatID      int64
-//	Amount      int64
-//	Description *string
-//}
-//
-//func (uc *UseCase) AddDebt(ctx context.Context, req AddDebtRequest) error {
-//	collector := model.Debts{
-//		CollectorID: req.CollectorID,
-//		DebtorID:    req.DebtorID,
-//		ChatID:      req.ChatID,
-//		Amount:      lo.ToPtr(req.Amount),
-//		UpdatedAt:   time.Now(),
-//		CreatedAt:   time.Now(),
-//	}
-//
-//	debtor := model.Debts{
-//		CollectorID: req.DebtorID,
-//		DebtorID:    req.CollectorID,
-//		ChatID:      req.ChatID,
-//		Amount:      lo.ToPtr(-req.Amount),
-//		UpdatedAt:   time.Now(),
-//		CreatedAt:   time.Now(),
-//	}
-//
-//	event := model.Events{
-//		CollectorID: req.CollectorID,
-//		DebtorID:    req.DebtorID,
-//		ChatID:      req.ChatID,
-//		Amount:      lo.ToPtr(req.Amount),
-//		Description: req.Description,
-//		CreatedAt:   time.Now(),
-//	}
-//
-//	if err := pgx.BeginFunc(ctx, uc.db, func(tx pgx.Tx) error {
-//		existingDebt, err := uc.debtRepo.GetForUpdate(ctx, tx, req.CollectorID, req.DebtorID, req.ChatID)
-//		if err != nil {
-//			return err
-//		}
-//
-//		switch existingDebt {
-//		// Если долга не существует -> нужно его создать
-//		case nil:
-//			err = uc.debtRepo.Create(ctx, tx, collector)
-//			if err != nil {
-//				return errors.Wrap(err, "failed to create collector debt")
-//			}
-//
-//			err = uc.debtRepo.Create(ctx, tx, debtor)
-//			if err != nil {
-//				return errors.Wrap(err, "failed to create debtor debt")
-//			}
-//		// Иначе, обновляем его
-//		default:
-//			collector.Amount = lo.ToPtr(lo.FromPtr(existingDebt.Amount) + req.Amount)
-//			err = uc.debtRepo.Update(ctx, tx, collector)
-//			if err != nil {
-//				return errors.Wrap(err, "failed to update collector debt")
-//			}
-//
-//			debtor.Amount = lo.ToPtr(lo.FromPtr(existingDebt.Amount) - req.Amount)
-//			err = uc.debtRepo.Update(ctx, tx, debtor)
-//			if err != nil {
-//				return errors.Wrap(err, "failed to update debtor debt")
-//			}
-//		}
-//
-//		// Создаем запись в таблице events в любом случае
-//		if err = uc.eventRepo.Create(ctx, tx, event); err != nil {
-//			return errors.Wrap(err, "failed to create event")
-//		}
-//
-//		return nil
-//	}); err != nil {
-//		return errors.Wrap(err, "failed to add debt")
-//	}
-//
-//	return nil
-//}
+import (
+	"context"
+	"fmt"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/pkg/errors"
+	"github.com/samber/lo"
+
+	"github.com/art22m/dengovie/internal/pkg/models"
+	"github.com/art22m/dengovie/internal/pkg/store"
+)
+
+type AddDebtRequest struct {
+	CollectorID int64
+	DebtorID    int64
+	ChatID      int64
+	Amount      int64
+	Description *string
+}
+
+func (uc *UseCase) AddDebt(ctx context.Context, req AddDebtRequest) error {
+	collector := &models.Debt{
+		CollectorID: req.CollectorID,
+		DebtorID:    req.DebtorID,
+		ChatID:      req.ChatID,
+		Amount:      req.Amount,
+	}
+
+	debtor := &models.Debt{
+		CollectorID: req.DebtorID,
+		DebtorID:    req.CollectorID,
+		ChatID:      req.ChatID,
+		Amount:      -req.Amount,
+	}
+
+	event := &models.Event{
+		CollectorID: req.CollectorID,
+		DebtorID:    req.DebtorID,
+		ChatID:      req.ChatID,
+		Amount:      req.Amount,
+		Description: lo.FromPtr(req.Description),
+	}
+
+	err := pgx.BeginFunc(ctx, uc.db, func(tx pgx.Tx) error {
+		existingDebt, err := uc.debtsRepo.GetTX(ctx, tx, req.CollectorID, req.DebtorID, req.ChatID)
+		switch {
+		case err == nil:
+		case errors.Is(err, store.DebtNotFound):
+		default:
+			return err
+		}
+
+		if errors.Is(err, store.DebtNotFound) {
+			err = uc.debtsRepo.CreateTX(ctx, tx, collector)
+			if err != nil {
+				return errors.Wrap(err, "failed to create debt")
+			}
+
+			err = uc.debtsRepo.CreateTX(ctx, tx, debtor)
+			if err != nil {
+				return errors.Wrap(err, "failed to create debt")
+			}
+		} else {
+			collector.Amount = existingDebt.Amount + req.Amount
+			_, err = uc.debtsRepo.UpdateTX(ctx, tx, collector)
+			if err != nil {
+				return errors.Wrap(err, "failed to update debt")
+			}
+
+			debtor.Amount = -collector.Amount
+			_, err = uc.debtsRepo.UpdateTX(ctx, tx, debtor)
+			if err != nil {
+				return errors.Wrap(err, "failed to update debt")
+			}
+		}
+
+		fmt.Println("add event")
+		if err = uc.eventsRepo.CreateTX(ctx, tx, event); err != nil {
+			return errors.Wrap(err, "failed to create event")
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return errors.Wrap(err, "failed to add debt")
+	}
+
+	return nil
+}
