@@ -27,4 +27,5 @@ jobs:
                     -e PG_DATABASE='${{ env.PG_DATABASE}}' \
                     -e PG_PASSWORD='${{ secrets.PG_PASSWORD }}' \
                     -e PG_SSL='require' \
+                    -d \
                     edikgoose/dengovie:${{ github.event.inputs.tag }}
