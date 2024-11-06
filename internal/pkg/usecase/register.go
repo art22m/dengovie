@@ -1,4 +1,4 @@
-package register_user
+package usecase
 
 import (
 	"context"
@@ -15,18 +15,6 @@ type RegisterUserRequest struct {
 	TelegramAlias  *string `json:"tg_alias"`
 }
 
-type UserRepo interface {
-	Create(ctx context.Context, user model.Users) error
-}
-
-type UseCase struct {
-	repo UserRepo
-}
-
-func NewUseCase(repo UserRepo) *UseCase {
-	return &UseCase{repo: repo}
-}
-
 func (uc *UseCase) Register(ctx context.Context, req RegisterUserRequest) error {
 	user := model.Users{
 		TgUserID:    req.TelegramUserID,
@@ -35,7 +23,7 @@ func (uc *UseCase) Register(ctx context.Context, req RegisterUserRequest) error 
 		CreatedAt:   time.Now(),
 	}
 
-	if err := uc.repo.Create(ctx, user); err != nil {
+	if err := uc.userRepo.Create(ctx, user); err != nil {
 		return errors.Wrap(err, "failed to register user")
 	}
 

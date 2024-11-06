@@ -1,4 +1,4 @@
-package add_debt
+package usecase
 
 import (
 	"context"
@@ -6,33 +6,16 @@ import (
 
 	"github.com/art22m/dengovie/internal/generated/dengovie/dengovie/public/model"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 )
 
 type AddDebtRequest struct {
-	CollectorID int64   `json:"collector_id"`
-	DebtorID    int64   `json:"debtor_id"`
-	ChatID      int64   `json:"chat_id"`
-	Amount      int64   `json:"amount"`
-	Description *string `json:"description,omitempty"`
-}
-
-type DebtRepo interface {
-	GetForUpdate(ctx context.Context, tx pgx.Tx, collectorID, debtorID, chatID int64) (*model.Debts, error)
-	Create(ctx context.Context, tx pgx.Tx, debt model.Debts) error
-	Update(ctx context.Context, tx pgx.Tx, debt model.Debts) error
-}
-
-type EventRepo interface {
-	Create(ctx context.Context, tx pgx.Tx, event model.Events) error
-}
-
-type UseCase struct {
-	db        *pgxpool.Pool
-	debtRepo  DebtRepo
-	eventRepo EventRepo
+	CollectorID int64
+	DebtorID    int64
+	ChatID      int64
+	Amount      int64
+	Description *string
 }
 
 func (uc *UseCase) AddDebt(ctx context.Context, req AddDebtRequest) error {
