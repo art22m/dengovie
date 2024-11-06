@@ -10,6 +10,7 @@ services:
       - PG_USER=postgres
       - PG_PASSWORD=password
       - PG_DATABASE=dengovie
+      - PG_SSL=disable
   postgres:
     image: postgres:12
     container_name: postgres
