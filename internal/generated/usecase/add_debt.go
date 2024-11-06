@@ -5,11 +5,10 @@ package usecase
 //	"context"
 //	"time"
 //
+//	"github.com/art22m/dengovie/internal/generated/dengovie/dengovie/public/model"
 //	"github.com/jackc/pgx/v5"
 //	"github.com/pkg/errors"
 //	"github.com/samber/lo"
-//
-//	"github.com/art22m/dengovie/internal/generated/dengovie/dengovie/public/model"
 //)
 //
 //type AddDebtRequest struct {

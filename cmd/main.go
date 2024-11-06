@@ -20,12 +20,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	eventsRepo := pg.NewEvents(store.NewDatabase(db))
-	//chatsRepo := pg.NewChats(store.NewDatabase(db))
-	usersRepo := pg.NewUsers(store.NewDatabase(db))
 	debtsRepo := pg.NewDebts(store.NewDatabase(db))
+	eventsRepo := pg.NewEvents(store.NewDatabase(db))
+	usersRepo := pg.NewUsers(store.NewDatabase(db))
+	chatsRepo := pg.NewChats(store.NewDatabase(db))
 
-	useCase := usecase.NewUseCase(db, debtsRepo, eventsRepo, usersRepo)
+	useCase := usecase.NewUseCase(db, debtsRepo, eventsRepo, usersRepo, chatsRepo)
 
 	service := app.NewService(
 		config.Telegram{

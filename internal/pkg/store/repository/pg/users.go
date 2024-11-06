@@ -2,10 +2,8 @@ package pg
 
 import (
 	"context"
-	"database/sql"
+	"fmt"
 
-	"github.com/art22m/dengovie/internal/generated/dengovie/dengovie/public/model"
-	"github.com/art22m/dengovie/internal/generated/dengovie/dengovie/public/table"
 	"github.com/art22m/dengovie/internal/pkg/models"
 	"github.com/art22m/dengovie/internal/pkg/store"
 )
@@ -20,14 +18,12 @@ func NewUsers(db store.DatabaseOperations) *UsersRepo {
 	}
 }
 
-func (r *UsersRepo) Create(ctx context.Context, user model.Users) error {
-	stmt, args := table.Users.
-		INSERT(table.Users.AllColumns.Except(table.Users.UserID)).
-		MODEL(user).
-		ON_CONFLICT().DO_NOTHING().
-		Sql()
-
-	_, err := r.db.Exec(ctx, stmt, args...)
+func (r *UsersRepo) Create(ctx context.Context, user *models.User) error {
+	q := "INSERT INTO users(tg_user_id, phone_number, tg_alias) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING"
+	_, err := r.db.Exec(
+		ctx, q,
+		user.TelegramUserID, user.PhoneNumber, user.TelegramAlias,
+	)
 	return err
 }
 
@@ -39,11 +35,15 @@ func (r *UsersRepo) Delete(ctx context.Context, id int64) (bool, error) {
 }
 
 func (r *UsersRepo) GetByTelegramUserID(ctx context.Context, id string) (*models.User, error) {
-	q := "SELECT user_id, tg_user_id, phone_number, tg_alias, created_at FROM users WHERE user_id = $1"
-	var u models.User
-	err := r.db.Get(ctx, &u, q, id)
-	if err == sql.ErrNoRows {
+	q := "SELECT user_id, tg_user_id, phone_number, tg_alias, created_at FROM users WHERE tg_user_id = $1"
+	users := make([]*models.User, 0)
+	err := r.db.Select(ctx, &users, q, id)
+	fmt.Println("!!", users, err)
+	if err != nil {
+		return nil, err
+	}
+	if len(users) == 0 {
 		return nil, store.UserNotFound
 	}
-	return &u, err
+	return users[0], err
 }

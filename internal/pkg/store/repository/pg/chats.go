@@ -12,8 +12,8 @@ type ChatsRepo struct {
 	db store.DatabaseOperations
 }
 
-func NewChats(db store.DatabaseOperations) *UsersRepo {
-	return &UsersRepo{
+func NewChats(db store.DatabaseOperations) *ChatsRepo {
+	return &ChatsRepo{
 		db: db,
 	}
 }
@@ -39,7 +39,7 @@ func (r *ChatsRepo) GetByTelegramChatID(ctx context.Context, id string) (*models
 	var u models.Chat
 	err := r.db.Get(ctx, &u, q, id)
 	if err == sql.ErrNoRows {
-		return nil, store.UserNotFound
+		return nil, store.ChatNotFound
 	}
 	return &u, err
 }
