@@ -19,7 +19,7 @@ jobs:
             key: ${{ secrets.SSH_KEY }}
             script: |
                 docker pull edikgoose/dengovie:${{ github.event.inputs.tag }} 
-                docker delete dengovie
+                docker remove dengovie
                 docker run \
                     -e TOKEN='${{ secrets.TELEGRAM_TOKEN}}' \
                     -e PG_HOST='${{ env.PG_HOST }}' \
