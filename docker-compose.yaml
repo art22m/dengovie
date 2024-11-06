@@ -13,6 +13,8 @@ services:
   postgres:
     image: postgres:12
     container_name: postgres
+    ports:
+      - 5433:5432
     environment:
       - POSTGRES_DB=dengovie
       - POSTGRES_USER=postgres
