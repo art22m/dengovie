@@ -19,7 +19,7 @@ func CreateDatabase(ctx context.Context) (*store.Database, error) {
 
 func generateDsn() string {
 	return fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		os.Getenv(DBHost),
 		os.Getenv(DBPort),
 		os.Getenv(DBUser),
