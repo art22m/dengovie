@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/samber/lo"
@@ -27,18 +26,35 @@ func main() {
 	chatsRepo := pg.NewChats(store.NewDatabase(db.GetPool()))
 
 	useCase := usecase.NewUseCase(db.GetPool(), debtsRepo, eventsRepo, usersRepo, chatsRepo)
+
 	//err = useCase.Register(ctx, usecase.RegisterUserRequest{
 	//	TelegramUserID: "123",
 	//	PhoneNumber:    "+123123123",
 	//	TelegramAlias:  lo.ToPtr("art22m"),
 	//})
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
 
-	err = useCase.AddDebt(ctx, usecase.AddDebtRequest{
-		CollectorID: 2,
-		DebtorID:    1,
+	//err = useCase.AddDebt(ctx, usecase.AddDebtRequest{
+	//	CollectorID: 2,
+	//	DebtorID:    1,
+	//	ChatID:      3,
+	//	Amount:      30,
+	//	Description: lo.ToPtr("test50"),
+	//})
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+
+	err = useCase.ReturnDebt(ctx, usecase.ReturnDebtRequest{
+		CollectorID: 1,
+		DebtorID:    2,
 		ChatID:      3,
-		Amount:      30,
-		Description: lo.ToPtr("test50"),
+		Amount:      5,
+		Description: lo.ToPtr("beer"),
 	})
-	fmt.Println("err=", err)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
