@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/art22m/dengovie/internal/generated/dengovie/dengovie/public/model"
+	"github.com/art22m/dengovie/internal/generated/dengovie/dengovie/public/table"
 	"github.com/art22m/dengovie/internal/pkg/models"
 	"github.com/art22m/dengovie/internal/pkg/store"
 )
@@ -18,12 +20,14 @@ func NewUsers(db store.DatabaseOperations) *UsersRepo {
 	}
 }
 
-func (r *UsersRepo) Create(ctx context.Context, user *models.User) error {
-	q := "INSERT INTO users(tg_user_id, phone_number, tg_alias) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING"
-	_, err := r.db.Exec(
-		ctx, q,
-		user.UserID, user.TelegramUserID, user.TelegramAlias,
-	)
+func (r *UsersRepo) Create(ctx context.Context, user model.Users) error {
+	stmt, args := table.Users.
+		INSERT(table.Users.AllColumns.Except(table.Users.UserID)).
+		MODEL(user).
+		ON_CONFLICT().DO_NOTHING().
+		Sql()
+
+	_, err := r.db.Exec(ctx, stmt, args...)
 	return err
 }
 
