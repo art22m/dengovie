@@ -6,4 +6,5 @@ const (
 	DBUser = "PG_USER"
 	DBPass = "PG_PASSWORD"
 	DBName = "PG_DATABASE"
+	DBSsl  = "PG_SSL"
 )
