@@ -11,7 +11,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-        - name: deploying docker container
+        - name: executing remote ssh commands using ssh key
           uses: appleboy/ssh-action@v1.1.0
           with:
             host: ${{ secrets.VM_HOST }}
