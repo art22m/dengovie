@@ -58,3 +58,13 @@ func (r *UsersRepo) Get(ctx context.Context, id int64) (*models.User, error) {
 	}
 	return users[0], err
 }
+
+func (r *UsersRepo) List(ctx context.Context) ([]*models.User, error) {
+	q := "SELECT user_id, tg_user_id, phone_number, tg_alias, created_at FROM users"
+	users := make([]*models.User, 0)
+	err := r.db.Select(ctx, &users, q)
+	if err != nil {
+		return nil, err
+	}
+	return users, err
+}

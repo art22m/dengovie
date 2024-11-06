@@ -9,6 +9,7 @@ import (
 )
 
 type UsersRepo interface {
+	List(ctx context.Context) ([]*models.User, error)
 	Create(ctx context.Context, user *models.User) error
 	Delete(ctx context.Context, id int64) (bool, error)
 	GetByTelegramUserID(ctx context.Context, id string) (*models.User, error)
