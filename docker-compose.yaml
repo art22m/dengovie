@@ -1,0 +1,22 @@
+version: '3.9'
+
+services:
+  dengovie:
+    image: edikgoose/dengovie:0.0.1
+    container_name: dengovie
+    environment:
+      - PG_HOST=postgres
+      - PG_PORT=5432
+      - PG_USER=postgres
+      - PG_PASSWORD=password
+      - PG_DATABASE=dengovie
+  postgres:
+    image: postgres:12
+    container_name: postgres
+    environment:
+      - POSTGRES_DB=dengovie
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - ./internal/pkg/store/migrations/001_init.up.sql:/docker-entrypoint-initdb.d/init.sql
