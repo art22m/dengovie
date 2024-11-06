@@ -4,12 +4,16 @@ import (
 	"log"
 	"os"
 
+	"github.com/art22m/dengovie/internal/pkg/usecase"
+
 	"github.com/art22m/dengovie/internal/config"
 	tele "gopkg.in/telebot.v4"
 )
 
 type Service struct {
 	Bot *tele.Bot
+	Log *log.Logger
+	Usecase *usecase.UseCase
 }
 
 func NewService(
@@ -22,6 +26,8 @@ func NewService(
 
 	return &Service{
 		Bot: bot,
+		Log: log.Default(),
+		Usecase: nil, // TODO(artemreyt): занести provideUseCase
 	}
 }
 
@@ -31,6 +37,7 @@ func provideBotApi(conf config.Telegram) (*tele.Bot, error) {
 		Poller: &tele.LongPoller{
 			Timeout: conf.PollTimeout,
 		},
+		Verbose: true,
 	}
 
 	b, err := tele.NewBot(pref)
@@ -39,4 +46,8 @@ func provideBotApi(conf config.Telegram) (*tele.Bot, error) {
 	}
 
 	return b, nil
+}
+
+func (s *Service) BindBotHandlers() {
+	s.bindRegisterHandlers()
 }
