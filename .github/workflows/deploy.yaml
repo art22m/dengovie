@@ -29,5 +29,5 @@ jobs:
                     -e PG_PASSWORD='${{ secrets.PG_PASSWORD }}' \
                     -e PG_SSL='require' \
                     -d \
-                    --name dengovie
+                    --name dengovie \
                     edikgoose/dengovie:${{ github.event.inputs.tag }}
