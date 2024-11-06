@@ -9,16 +9,16 @@ on:
         build_image:
           description: 'Should new image tag be builded (yes/no)'
           required: true
-          default: 'yes'
+          default: 'true'
         deploy:
           description: "Should image be deployed (yes/no)"
           required: true
-          default: 'no'
+          default: 'false'
 
 
 jobs:
   docker-build-push:
-    if: ${{ github.event.inputs.build_image }} == 'yes'
+    if: ${{ github.event.inputs.build_image }} == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Set up QEMU
@@ -36,7 +36,7 @@ jobs:
           push: true
           tags: edikgoose/dengovie:${{ github.event.inputs.tag }}
   deploy:
-    if: ${{ github.event.inputs.deploy }} == 'yes'
+    if: ${{ github.event.inputs.deploy }} == 'true'
     runs-on: ubuntu-latest
     steps:
         - name: deploying docker container
