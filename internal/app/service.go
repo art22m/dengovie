@@ -12,8 +12,8 @@ import (
 )
 
 type Service struct {
-	Bot *tele.Bot
-	Log *log.Logger
+	Bot     *tele.Bot
+	Log     *log.Logger
 	Usecase *usecase.UseCase
 }
 
@@ -56,4 +56,5 @@ func provideBotApi(conf config.Telegram) (*tele.Bot, error) {
 
 func (s *Service) BindBotHandlers() {
 	s.bindRegisterHandlers()
+	s.bindListDebts()
 }
