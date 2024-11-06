@@ -15,7 +15,7 @@ import (
 func (s *Service) ListDebts(c telebot.Context) error {
 	chat := c.Chat()
 	if chat == nil || chat.Type != telebot.ChatGroup {
-		s.Log.Printf("/list_debts not in a group chat. Author: %d", c.Sender().ID)
+		s.Log.Printf("/list not in a group chat. Author: %d", c.Sender().ID)
 		return nil
 	}
 
@@ -56,7 +56,7 @@ func buildResponse(resp usecase.ListDebtsResponse) string {
 		)
 	}
 
-	builder.Write([]byte(fmt.Sprintf("Список долго для %s", collectorMention)))
+	builder.Write([]byte(fmt.Sprintf("Список долгов для %s", collectorMention)))
 	for i, debt := range resp.DebtsInfo {
 		debtorMention := fmt.Sprintf("[unknown](tg://user?id=%s)", debt.DebtorTelegramID)
 		if debt.DebtorTelegramAlias != nil {
@@ -66,10 +66,10 @@ func buildResponse(resp usecase.ListDebtsResponse) string {
 				debt.DebtorTelegramID,
 			)
 		}
-		var tt string
+		var debtText string
 		switch {
 		case debt.Amount > 0:
-			tt = fmt.Sprintf(
+			debtText = fmt.Sprintf(
 				"%d) %s должен %s %d,%d\n",
 				i,
 				debtorMention,
@@ -78,7 +78,7 @@ func buildResponse(resp usecase.ListDebtsResponse) string {
 				debt.Amount%100,
 			)
 		case debt.Amount < 0:
-			tt = fmt.Sprintf(
+			debtText = fmt.Sprintf(
 				"%d) %s должен %s %d,%d\n",
 				i,
 				collectorMention,
@@ -90,7 +90,7 @@ func buildResponse(resp usecase.ListDebtsResponse) string {
 			continue
 		}
 
-		builder.Write([]byte(tt))
+		builder.Write([]byte(debtText))
 	}
 
 	return builder.String()
