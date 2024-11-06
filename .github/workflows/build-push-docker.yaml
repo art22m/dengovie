@@ -8,7 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Generate tag
-        run: echo "TAG=`echo ${GITHUB_SHA::7}`"
+        run: |
+          export TAG=`echo ${GITHUB_SHA::7}`
+          echo "TAG=$TAG"
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
