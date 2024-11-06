@@ -1,15 +1,26 @@
 name: build and push docker image
 
 on:
-  push:
+  workflow_dispatch:
+    inputs:
+        tag:
+          description: 'Tag of the docker image'
+          required: true
+        build_image:
+          description: 'Should new image tag be builded (yes/no)'
+          required: true
+          default: 'true'
+        deploy:
+          description: "Should image be deployed (yes/no)"
+          required: true
+          default: 'false'
+
 
 jobs:
   docker-build-push:
+    if: ${{ github.event.inputs.build_image }} == 'true'
     runs-on: ubuntu-latest
     steps:
-      - name: Generate tag
-        run: |
-          echo "TAG=`echo ${GITHUB_SHA::7}`" >> "$GITHUB_ENV"
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -23,4 +34,27 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: edikgoose/dengovie:${{ env.TAG }}
+          tags: edikgoose/dengovie:${{ github.event.inputs.tag }}
+  deploy:
+    if: ${{ github.event.inputs.deploy }} == 'true'
+    runs-on: ubuntu-latest
+    steps:
+        - name: deploying docker container
+          uses: appleboy/ssh-action@v1.1.0
+          with:
+            host: ${{ secrets.VM_HOST }}
+            username: ${{ secrets.VM_USERNAME }}
+            key: ${{ secrets.SSH_KEY }}
+            script: |
+                docker pull edikgoose/dengovie:${{ github.event.inputs.tag }} 
+                docker remove dengovie
+                docker run \
+                    -e TOKEN='${{ secrets.TELEGRAM_TOKEN}}' \
+                    -e PG_HOST='${{ env.PG_HOST }}' \
+                    -e PG_PORT='${{ env.PG_PORT }}' \
+                    -e PG_USER='${{ env.PG_USER }}' \
+                    -e PG_DATABASE='${{ env.PG_DATABASE}}' \
+                    -e PG_PASSWORD='${{ secrets.PG_PASSWORD }}' \
+                    -e PG_SSL='require' \
+                    -d \
+                    edikgoose/dengovie:${{ github.event.inputs.tag }}
