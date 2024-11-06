@@ -4,8 +4,6 @@ import (
 	"context"
 	"log"
 
-	"github.com/samber/lo"
-
 	"github.com/art22m/dengovie/internal/pkg/store"
 	"github.com/art22m/dengovie/internal/pkg/store/repository/pg"
 	"github.com/art22m/dengovie/internal/pkg/usecase"
@@ -30,7 +28,7 @@ func main() {
 	//err = useCase.Register(ctx, usecase.RegisterUserRequest{
 	//	TelegramUserID: "123",
 	//	PhoneNumber:    "+123123123",
-	//	TelegramAlias:  lo.ToPtr("art22m"),
+	//	TelegramAlias:  "art22m",
 	//})
 	//if err != nil {
 	//	log.Fatal(err)
@@ -41,7 +39,7 @@ func main() {
 	//	DebtorID:    1,
 	//	ChatID:      3,
 	//	Amount:      30,
-	//	Description: lo.ToPtr("test50"),
+	//	Description: "test50",
 	//})
 	//if err != nil {
 	//	log.Fatal(err)
@@ -52,7 +50,7 @@ func main() {
 		DebtorID:    2,
 		ChatID:      3,
 		Amount:      5,
-		Description: lo.ToPtr("beer"),
+		Description: "beer",
 	})
 	if err != nil {
 		log.Fatal(err)

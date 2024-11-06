@@ -6,7 +6,6 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/pkg/errors"
-	"github.com/samber/lo"
 
 	"github.com/art22m/dengovie/internal/pkg/models"
 	"github.com/art22m/dengovie/internal/pkg/store"
@@ -17,7 +16,7 @@ type AddDebtRequest struct {
 	DebtorID    int64
 	ChatID      int64
 	Amount      int64
-	Description *string
+	Description string
 }
 
 func (uc *UseCase) AddDebt(ctx context.Context, req AddDebtRequest) error {
@@ -40,7 +39,7 @@ func (uc *UseCase) AddDebt(ctx context.Context, req AddDebtRequest) error {
 		DebtorID:    req.DebtorID,
 		ChatID:      req.ChatID,
 		Amount:      req.Amount,
-		Description: lo.FromPtr(req.Description),
+		Description: req.Description,
 	}
 
 	err := pgx.BeginFunc(ctx, uc.db, func(tx pgx.Tx) error {
