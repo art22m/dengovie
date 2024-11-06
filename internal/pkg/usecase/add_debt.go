@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/pkg/errors"
@@ -20,6 +19,17 @@ type AddDebtRequest struct {
 }
 
 func (uc *UseCase) AddDebt(ctx context.Context, req AddDebtRequest) error {
+	err := pgx.BeginFunc(ctx, uc.db, func(tx pgx.Tx) error {
+		return uc.addDebtTX(ctx, tx, req)
+	})
+	if err != nil {
+		return errors.Wrap(err, "failed to add debt")
+	}
+
+	return nil
+}
+
+func (uc *UseCase) addDebtTX(ctx context.Context, tx pgx.Tx, req AddDebtRequest) error {
 	collector := &models.Debt{
 		CollectorID: req.CollectorID,
 		DebtorID:    req.DebtorID,
@@ -42,49 +52,40 @@ func (uc *UseCase) AddDebt(ctx context.Context, req AddDebtRequest) error {
 		Description: req.Description,
 	}
 
-	err := pgx.BeginFunc(ctx, uc.db, func(tx pgx.Tx) error {
-		existingDebt, err := uc.debtsRepo.GetTX(ctx, tx, req.CollectorID, req.DebtorID, req.ChatID)
-		switch {
-		case err == nil:
-		case errors.Is(err, store.DebtNotFound):
-		default:
-			return err
+	existingDebt, err := uc.debtsRepo.GetTX(ctx, tx, req.CollectorID, req.DebtorID, req.ChatID)
+	switch {
+	case err == nil:
+	case errors.Is(err, store.DebtNotFound):
+	default:
+		return err
+	}
+
+	if errors.Is(err, store.DebtNotFound) {
+		err = uc.debtsRepo.CreateTX(ctx, tx, collector)
+		if err != nil {
+			return errors.Wrap(err, "failed to create debt")
 		}
 
-		if errors.Is(err, store.DebtNotFound) {
-			err = uc.debtsRepo.CreateTX(ctx, tx, collector)
-			if err != nil {
-				return errors.Wrap(err, "failed to create debt")
-			}
-
-			err = uc.debtsRepo.CreateTX(ctx, tx, debtor)
-			if err != nil {
-				return errors.Wrap(err, "failed to create debt")
-			}
-		} else {
-			collector.Amount = existingDebt.Amount + req.Amount
-			_, err = uc.debtsRepo.UpdateTX(ctx, tx, collector)
-			if err != nil {
-				return errors.Wrap(err, "failed to update debt")
-			}
-
-			debtor.Amount = -collector.Amount
-			_, err = uc.debtsRepo.UpdateTX(ctx, tx, debtor)
-			if err != nil {
-				return errors.Wrap(err, "failed to update debt")
-			}
+		err = uc.debtsRepo.CreateTX(ctx, tx, debtor)
+		if err != nil {
+			return errors.Wrap(err, "failed to create debt")
+		}
+	} else {
+		collector.Amount = existingDebt.Amount + req.Amount
+		_, err = uc.debtsRepo.UpdateTX(ctx, tx, collector)
+		if err != nil {
+			return errors.Wrap(err, "failed to update debt")
 		}
 
-		fmt.Println("add event")
-		if err = uc.eventsRepo.CreateTX(ctx, tx, event); err != nil {
-			return errors.Wrap(err, "failed to create event")
+		debtor.Amount = -collector.Amount
+		_, err = uc.debtsRepo.UpdateTX(ctx, tx, debtor)
+		if err != nil {
+			return errors.Wrap(err, "failed to update debt")
 		}
+	}
 
-		return nil
-	})
-
-	if err != nil {
-		return errors.Wrap(err, "failed to add debt")
+	if err = uc.eventsRepo.CreateTX(ctx, tx, event); err != nil {
+		return errors.Wrap(err, "failed to create event")
 	}
 
 	return nil

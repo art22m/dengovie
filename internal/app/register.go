@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"strconv"
 
 	"github.com/art22m/dengovie/internal/pkg/usecase"
@@ -47,6 +48,9 @@ func (s *Service) ShareContact(c telebot.Context) error {
 	}
 
 	if err := s.Usecase.Register(context.TODO(), req); err != nil {
+		if errors.Is(err, usecase.ErrUserAlreadyExists) {
+			c.Send("Вы уже зарегистрированы.")
+		}
 		return err
 	}
 

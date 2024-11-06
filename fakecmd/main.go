@@ -45,11 +45,22 @@ func main() {
 	//	log.Fatal(err)
 	//}
 
-	err = useCase.ReturnDebt(ctx, usecase.ReturnDebtRequest{
+	//err = useCase.ReturnDebt(ctx, usecase.ReturnDebtRequest{
+	//	CollectorID: 1,
+	//	DebtorID:    2,
+	//	ChatID:      3,
+	//	Amount:      5,
+	//	Description: "beer",
+	//})
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+
+	err = useCase.SplitDebt(ctx, usecase.SplitDebtRequest{
 		CollectorID: 1,
-		DebtorID:    2,
+		DebtorIDs:   []int64{2, 3},
 		ChatID:      3,
-		Amount:      5,
+		TotalAmount: 10,
 		Description: "beer",
 	})
 	if err != nil {

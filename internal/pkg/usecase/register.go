@@ -9,6 +9,10 @@ import (
 	"github.com/art22m/dengovie/internal/pkg/store"
 )
 
+var (
+	ErrUserAlreadyExists = errors.New("user already exists")
+)
+
 type RegisterUserRequest struct {
 	TelegramUserID string
 	PhoneNumber    string
@@ -23,7 +27,7 @@ func (uc *UseCase) Register(ctx context.Context, req RegisterUserRequest) error 
 	case err != nil:
 		return errors.Wrap(err, "failed to check user")
 	case err == nil:
-		return errors.New("user already registered")
+		return ErrUserAlreadyExists
 	}
 
 	user := &models.User{
