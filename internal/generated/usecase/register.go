@@ -16,7 +16,7 @@ package usecase
 //	TelegramAlias  *string
 //}
 //
-//func (uc *UseCase) Register(ctx context.Context, req RegisterUserRequest) error {
+//func (uc *UseCase) RegisterUser(ctx context.Context, req RegisterUserRequest) error {
 //	user := model.Users{
 //		TgUserID:    req.TelegramUserID,
 //		PhoneNumber: req.PhoneNumber,

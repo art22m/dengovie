@@ -9,17 +9,13 @@ import (
 	"github.com/art22m/dengovie/internal/pkg/store"
 )
 
-var (
-	ErrUserAlreadyExists = errors.New("user already exists")
-)
-
 type RegisterUserRequest struct {
 	TelegramUserID string
 	PhoneNumber    string
 	TelegramAlias  *string
 }
 
-func (uc *UseCase) Register(ctx context.Context, req RegisterUserRequest) error {
+func (uc *UseCase) RegisterUser(ctx context.Context, req RegisterUserRequest) error {
 	_, err := uc.usersRepo.GetByTelegramUserID(ctx, req.TelegramUserID)
 	switch {
 	case errors.Is(err, store.UserNotFound):

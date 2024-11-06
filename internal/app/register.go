@@ -5,12 +5,13 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/art22m/dengovie/internal/pkg/usecase"
 	"gopkg.in/telebot.v4"
+
+	"github.com/art22m/dengovie/internal/pkg/usecase"
 )
 
 var (
-	registerMenu = &telebot.ReplyMarkup{}
+	registerMenu       = &telebot.ReplyMarkup{}
 	shareContactButton = registerMenu.Contact("Поделиться телефоном телефоном")
 )
 
@@ -30,7 +31,7 @@ func (s *Service) Register(c telebot.Context) error {
 func (s *Service) ShareContact(c telebot.Context) error {
 	contact := c.Message().Contact
 	chat := c.Chat()
-	
+
 	if chat == nil || chat.Type != telebot.ChatPrivate {
 		s.Log.Printf("ShareContact button:  not in a private chat '%s'. Author: %d", chat.Title, c.Sender().ID)
 		return nil
@@ -43,11 +44,11 @@ func (s *Service) ShareContact(c telebot.Context) error {
 
 	req := usecase.RegisterUserRequest{
 		TelegramUserID: strconv.FormatInt(contact.UserID, 10),
-		PhoneNumber: contact.PhoneNumber,
-		TelegramAlias: &c.Sender().Username,
+		PhoneNumber:    contact.PhoneNumber,
+		TelegramAlias:  &c.Sender().Username,
 	}
 
-	if err := s.Usecase.Register(context.TODO(), req); err != nil {
+	if err := s.Usecase.RegisterUser(context.TODO(), req); err != nil {
 		if errors.Is(err, usecase.ErrUserAlreadyExists) {
 			c.Send("Вы уже зарегистрированы.")
 		}
@@ -55,12 +56,12 @@ func (s *Service) ShareContact(c telebot.Context) error {
 	}
 
 	c.Send("Вы успешно зарегестрированны!")
-	
+
 	return nil
 }
 
 func (s *Service) bindRegisterHandlers() {
-	
+
 	registerMenu.Reply(
 		registerMenu.Row(shareContactButton),
 	)

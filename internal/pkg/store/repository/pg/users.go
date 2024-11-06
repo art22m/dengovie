@@ -45,3 +45,16 @@ func (r *UsersRepo) GetByTelegramUserID(ctx context.Context, id string) (*models
 	}
 	return users[0], err
 }
+
+func (r *UsersRepo) Get(ctx context.Context, id int64) (*models.User, error) {
+	q := "SELECT user_id, tg_user_id, phone_number, tg_alias, created_at FROM users WHERE user_id = $1"
+	users := make([]*models.User, 0)
+	err := r.db.Select(ctx, &users, q, id)
+	if err != nil {
+		return nil, err
+	}
+	if len(users) == 0 {
+		return nil, store.UserNotFound
+	}
+	return users[0], err
+}

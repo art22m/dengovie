@@ -50,30 +50,26 @@ func (r *DebtRepository) UpdateTX(ctx context.Context, tx pgx.Tx, debt *models.D
 	return result.RowsAffected() > 0, err
 }
 
-func (r *DebtRepository) ListByChatID(ctx context.Context, chatID int64) ([]*models.Debt, error) {
+func (r *DebtRepository) List(ctx context.Context, collectorID *int64, chatID *int64) ([]*models.Debt, error) {
+	args := make([]interface{}, 0)
+	q := "SELECT collector_id, debtor_id, chat_id, amount, updated_at, created_at FROM debts WHERE 1 = 1"
+	switch {
+	case collectorID != nil && chatID != nil:
+		args = append(args, *collectorID, *chatID)
+		q += " AND collector_id = $1 AND chat_id = $2"
+	case collectorID != nil:
+		args = append(args, *collectorID)
+		q += " AND collector_id = $1"
+	case chatID != nil:
+		args = append(args, *chatID)
+		q += " AND chat_id = $1"
+	}
 	debts := make([]*models.Debt, 0)
-	err := r.db.Select(ctx, &debts,
-		"SELECT collector_id, debtor_id, chat_id, amount, updated_at, created_at  FROM debts WHERE chat_id = $1",
-		chatID,
+	err := r.db.Select(
+		ctx, &debts,
+		q, args...,
 	)
-	return debts, err
-}
-
-func (r *DebtRepository) ListByCollectorID(ctx context.Context, collectorID int64) ([]*models.Debt, error) {
-	debts := make([]*models.Debt, 0)
-	err := r.db.Select(ctx, &debts,
-		"SELECT collector_id, debtor_id, chat_id, amount, updated_at, created_at  FROM debts WHERE collector_id = $1",
-		collectorID,
-	)
-	return debts, err
-}
-
-func (r *DebtRepository) ListByDebtorID(ctx context.Context, debtorID int64) ([]*models.Debt, error) {
-	debts := make([]*models.Debt, 0)
-	err := r.db.Select(ctx, &debts,
-		"SELECT collector_id, debtor_id, chat_id, amount, updated_at, created_at  FROM debts WHERE debtor_id = $1",
-		debtorID,
-	)
+	//fmt.Println(len(debts), lo.FromPtr(collectorID), lo.FromPtr(chatID), q)
 	return debts, err
 }
 

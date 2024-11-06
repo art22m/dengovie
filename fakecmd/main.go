@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
+
+	"github.com/samber/lo"
 
 	"github.com/art22m/dengovie/internal/pkg/store"
 	"github.com/art22m/dengovie/internal/pkg/store/repository/pg"
@@ -25,10 +28,18 @@ func main() {
 
 	useCase := usecase.NewUseCase(db.GetPool(), debtsRepo, eventsRepo, usersRepo, chatsRepo)
 
-	//err = useCase.Register(ctx, usecase.RegisterUserRequest{
-	//	TelegramUserID: "123",
+	//err = useCase.RegisterUser(ctx, usecase.RegisterUserRequest{
+	//	TelegramUserID: "triplo",
 	//	PhoneNumber:    "+123123123",
-	//	TelegramAlias:  "art22m",
+	//	TelegramAlias:  lo.ToPtr("triplo"),
+	//})
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+
+	//err = useCase.RegisterChat(ctx, usecase.RegisterChatRequest{
+	//	TelegramChatID: "3",
+	//	Info:           "test info",
 	//})
 	//if err != nil {
 	//	log.Fatal(err)
@@ -56,14 +67,27 @@ func main() {
 	//	log.Fatal(err)
 	//}
 
-	err = useCase.SplitDebt(ctx, usecase.SplitDebtRequest{
-		CollectorID: 1,
-		DebtorIDs:   []int64{2, 3},
-		ChatID:      3,
-		TotalAmount: 10,
-		Description: "beer",
+	//err = useCase.SplitDebt(ctx, usecase.SplitDebtRequest{
+	//	CollectorID: 1,
+	//	DebtorIDs:   []int64{2, 3},
+	//	ChatID:      3,
+	//	TotalAmount: 10,
+	//	Description: "beer",
+	//})
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+
+	resp, err := useCase.ListDebts(ctx, usecase.ListDebtsRequest{
+		TelegramUserID: "123",
+		TelegramChatID: "3",
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println("!!!", lo.FromPtr(resp.CollectorTelegramAlias), resp.CollectorTelegramID)
+	for _, info := range resp.DebtsInfo {
+		fmt.Println(lo.FromPtr(info.DebtorTelegramAlias), info.DebtorTelegramID, info.Amount, info.LastModified)
+	}
+
 }

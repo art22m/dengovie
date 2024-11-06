@@ -12,6 +12,7 @@ type UsersRepo interface {
 	Create(ctx context.Context, user *models.User) error
 	Delete(ctx context.Context, id int64) (bool, error)
 	GetByTelegramUserID(ctx context.Context, id string) (*models.User, error)
+	Get(ctx context.Context, id int64) (*models.User, error)
 }
 
 type ChatsRepo interface {
@@ -21,9 +22,7 @@ type ChatsRepo interface {
 }
 
 type DebtsRepo interface {
-	ListByChatID(ctx context.Context, chatID int64) ([]*models.Debt, error)
-	ListByCollectorID(ctx context.Context, collectorID int64) ([]*models.Debt, error)
-	ListByDebtorID(ctx context.Context, debtorID int64) ([]*models.Debt, error)
+	List(ctx context.Context, collectorID *int64, chatID *int64) ([]*models.Debt, error)
 	Delete(ctx context.Context, collectorID, debtorID, chatID int64) (bool, error)
 
 	CreateTX(ctx context.Context, tx pgx.Tx, debt *models.Debt) error
