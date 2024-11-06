@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"log"
 	"os"
 
@@ -39,6 +40,10 @@ func provideBotApi(conf config.Telegram) (*tele.Bot, error) {
 			Timeout: conf.PollTimeout,
 		},
 		Verbose: true,
+	}
+
+	if pref.Token == "" {
+		return nil, errors.New("Empty bot api token")
 	}
 
 	b, err := tele.NewBot(pref)

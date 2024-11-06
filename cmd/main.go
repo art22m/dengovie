@@ -33,9 +33,6 @@ func main() {
 		},
 		useCase,
 	)
-
-	service.Bot.Handle("/register", service.Register)
-	service.Bot.Handle("/split", service.Split)
-
+	service.BindBotHandlers()
 	service.Bot.Start()
 }
