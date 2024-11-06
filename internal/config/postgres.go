@@ -5,16 +5,15 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/art22m/dengovie/internal/pkg/store"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func CreateDatabase(ctx context.Context) (*store.Database, error) {
+func CreateDatabase(ctx context.Context) (*pgxpool.Pool, error) {
 	pool, err := pgxpool.New(ctx, generateDsn())
 	if err != nil {
 		return nil, err
 	}
-	return store.NewDatabase(pool), nil
+	return pool, nil
 }
 
 func generateDsn() string {

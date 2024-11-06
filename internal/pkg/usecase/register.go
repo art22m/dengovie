@@ -10,9 +10,9 @@ import (
 )
 
 type RegisterUserRequest struct {
-	TelegramUserID string  `json:"tg_user_id"`
-	PhoneNumber    string  `json:"phone_number"`
-	TelegramAlias  *string `json:"tg_alias"`
+	TelegramUserID string
+	PhoneNumber    string
+	TelegramAlias  *string
 }
 
 func (uc *UseCase) Register(ctx context.Context, req RegisterUserRequest) error {

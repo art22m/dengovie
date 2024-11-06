@@ -7,28 +7,32 @@ import (
 
 	"github.com/art22m/dengovie/internal/app"
 	"github.com/art22m/dengovie/internal/config"
-	"github.com/art22m/dengovie/internal/generated/dengovie/dengovie/public/model"
-	"github.com/art22m/dengovie/internal/generated/dengovie/dengovie/public/table"
+	"github.com/art22m/dengovie/internal/pkg/store"
+	"github.com/art22m/dengovie/internal/pkg/store/repository/pg"
+	"github.com/art22m/dengovie/internal/pkg/usecase"
 )
 
 func main() {
 	ctx := context.Background()
 
-	// КОД ДЛЯ ТЕСТОВ КОННЕКТА К БД ДЛЯ ЭДУАРДА
 	db, err := config.CreateDatabase(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	stmt, args := table.Chats.SELECT(table.Chats.AllColumns).LIMIT(1).Sql()
-	var chat model.Chats
-	if err = db.Get(ctx, &chat, stmt, args...); err != nil {
-		log.Fatal(err)
-	}
+	eventsRepo := pg.NewEvents(store.NewDatabase(db))
+	//chatsRepo := pg.NewChats(store.NewDatabase(db))
+	usersRepo := pg.NewUsers(store.NewDatabase(db))
+	debtsRepo := pg.NewDebts(store.NewDatabase(db))
 
-	service := app.NewService(config.Telegram{
-		PollTimeout: 10 * time.Second,
-	})
+	useCase := usecase.NewUseCase(db, debtsRepo, eventsRepo, usersRepo)
+
+	service := app.NewService(
+		config.Telegram{
+			PollTimeout: 10 * time.Second,
+		},
+		useCase,
+	)
 
 	service.Bot.Handle("/register", service.Register)
 	service.Bot.Handle("/split", service.Split)

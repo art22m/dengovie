@@ -18,22 +18,23 @@ type Service struct {
 
 func NewService(
 	tg config.Telegram,
-) (*Service) {
+	useCase *usecase.UseCase,
+) *Service {
 	bot, err := provideBotApi(tg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	return &Service{
-		Bot: bot,
-		Log: log.Default(),
-		Usecase: nil, // TODO(artemreyt): занести provideUseCase
+		Bot:     bot,
+		Log:     log.Default(),
+		Usecase: useCase,
 	}
 }
 
 func provideBotApi(conf config.Telegram) (*tele.Bot, error) {
 	pref := tele.Settings{
-		Token:  os.Getenv("TOKEN"),
+		Token: os.Getenv("TOKEN"),
 		Poller: &tele.LongPoller{
 			Timeout: conf.PollTimeout,
 		},
