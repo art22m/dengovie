@@ -11,6 +11,7 @@ services:
       - PG_PASSWORD=password
       - PG_DATABASE=dengovie
       - PG_SSL=disable
+      - TOKEN=7770271127:AAHzcuNLvyR_rrM0Wn02k-4I4tJQDF1YvrI
   postgres:
     image: postgres:12
     container_name: postgres
