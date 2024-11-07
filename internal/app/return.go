@@ -6,8 +6,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/art22m/dengovie/internal/pkg/usecase"
 	"gopkg.in/telebot.v4"
+
+	"github.com/art22m/dengovie/internal/pkg/usecase"
 )
 
 func (s *Service) Return(c telebot.Context) error {
@@ -30,9 +31,9 @@ func (s *Service) ReturnSelect(c telebot.Context) error {
 
 	req := usecase.ReturnDebtRequest{
 		CollectorID: data.TelegramID,
-		DebtorID: c.Sender().ID,
-		ChatID: c.Chat().ID,
-		Amount: data.Amount,
+		DebtorID:    c.Sender().ID,
+		ChatID:      c.Chat().ID,
+		Amount:      data.Amount * 100,
 	}
 
 	if err := s.Usecase.ReturnDebt(context.TODO(), req); err != nil {
@@ -71,14 +72,14 @@ func makeKeyboardForReturn(infos []usecase.DebtInfo) (*telebot.ReplyMarkup, erro
 
 	rows := make([]telebot.Row, MaxUsersInColumn)
 	for i, info := range infos {
-		row_i := i%MaxUsersInColumn
+		row_i := i % MaxUsersInColumn
 
 		if info.Amount >= 0 {
 			continue
 		}
 
 		btn, err := makeUserButtonReturn(info)
-		
+
 		if err != nil {
 			return nil, fmt.Errorf("Can't create selector button for return: %w", err)
 		}
@@ -103,10 +104,10 @@ func (data returnBtnData) Text() string {
 
 func makeUserButtonReturn(info usecase.DebtInfo) (telebot.Btn, error) {
 	data := returnBtnData{
-		CallbackData: CallbackData{ Type: ButtonDataReturn },
+		CallbackData:   CallbackData{Type: ButtonDataReturn},
 		UserScreenName: *info.DebtorTelegramAlias,
-		TelegramID: info.DebtorTelegramID,
-		Amount: -info.Amount / 100,
+		TelegramID:     info.DebtorTelegramID,
+		Amount:         -info.Amount / 100,
 	}
 
 	dataRaw, err := json.Marshal(data)
