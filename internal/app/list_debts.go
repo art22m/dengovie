@@ -6,10 +6,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/art22m/dengovie/internal/pkg/usecase"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"gopkg.in/telebot.v4"
+
+	"github.com/art22m/dengovie/internal/pkg/usecase"
 )
 
 func (s *Service) ListDebts(c telebot.Context) error {
@@ -72,7 +73,7 @@ func (s *Service) buildResponse(resp usecase.ListDebtsResponse) string {
 		switch {
 		case debt.Amount > 0:
 			debtText = fmt.Sprintf(
-				"%d) %s должен %s %d,%d\n",
+				"%d) %s должен %s %d,%d рублей\n",
 				i+1,
 				debtorMention,
 				collectorMention,
@@ -82,7 +83,7 @@ func (s *Service) buildResponse(resp usecase.ListDebtsResponse) string {
 		case debt.Amount < 0:
 			amount := -debt.Amount
 			debtText = fmt.Sprintf(
-				"%d) %s должен %s %d,%d\n",
+				"%d) %s должен %s %d,%d рублей\n",
 				i+1,
 				collectorMention,
 				debtorMention,
