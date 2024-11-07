@@ -284,6 +284,7 @@ func (s *Service) completeSplit(c telebot.Context) error {
 	}
 
 	debtorIDs := make([]int64, 0)
+	debtorScreenames := make([]string, 0)
 	for i, row := range keyboard {
 		for _, btn := range row {
 
@@ -299,6 +300,7 @@ func (s *Service) completeSplit(c telebot.Context) error {
 
 			if data.Chosen {
 				debtorIDs = append(debtorIDs, data.TelegramID)
+				debtorScreenames = append(debtorScreenames, data.UserScreenName)
 			}
 		}
 	}
@@ -322,11 +324,13 @@ func (s *Service) completeSplit(c telebot.Context) error {
 	}
 
 	notification := fmt.Sprintf("Новый долг в %d рублей распределен между", req.TotalAmount)
-	for i, id := range debtorIDs {
-		notification += fmt.Sprintf(" [чувак %d](tg://user?id=%d)", i, id)
+	for i := range debtorIDs {
+		notification += fmt.Sprintf(" [%s](tg://user?id=%d)", debtorScreenames[i], debtorIDs[i])
 	}
 
-	c.Send(notification)
+	c.Send(notification, &telebot.SendOptions{
+		ParseMode: telebot.ModeMarkdown,
+	})
 
 	return nil
 }
