@@ -22,10 +22,10 @@ jobs:
                 docker remove --force dengovie
                 docker run \
                     -e TOKEN='${{ secrets.TELEGRAM_TOKEN}}' \
-                    -e PG_HOST='${{ env.PG_HOST }}' \
-                    -e PG_PORT='${{ env.PG_PORT }}' \
-                    -e PG_USER='${{ env.PG_USER }}' \
-                    -e PG_DATABASE='${{ env.PG_DATABASE}}' \
+                    -e PG_HOST='rc1a-8q6oi2zh1a485jor.mdb.yandexcloud.net' \
+                    -e PG_PORT='6432' \
+                    -e PG_USER='edikgoose' \
+                    -e PG_DATABASE='dengovie' \
                     -e PG_PASSWORD='${{ secrets.PG_PASSWORD }}' \
                     -e PG_SSL='require' \
                     -d \
