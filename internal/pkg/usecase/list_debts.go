@@ -48,7 +48,7 @@ func (uc *UseCase) ListDebts(ctx context.Context, req ListDebtsRequest) (*ListDe
 
 	debts, err := uc.debtsRepo.List(ctx, &collector.UserID, &chat.ChatID)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to register user")
+		return nil, errors.Wrap(err, "failed to get collectors debts")
 	}
 
 	resp := ListDebtsResponse{
