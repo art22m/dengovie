@@ -13,18 +13,18 @@ import (
 )
 
 const (
-	MaxUsersInColumn = 5
+	MaxUsersInColumn  = 5
 	MaxDescriptionLen = 32
 
-	SplitButtonText = "OK"
-	SelectUserSymbol = "✅"
+	SplitButtonText    = "OK"
+	SelectUserSymbol   = "✅"
 	DeselectUserSymbol = "❌"
 )
 
 func (s *Service) Split(c telebot.Context) error {
 	chat := c.Chat()
 	switch chat.Type {
-	case telebot.ChatGroup:
+	case telebot.ChatGroup, telebot.ChatSuperGroup:
 		return s.splitInGroup(c)
 	default:
 		return errors.New("Unsupported chat type for split")
@@ -39,7 +39,7 @@ func (s *Service) splitInGroup(c telebot.Context) error {
 		return fmt.Errorf("Args are not valid: %w", err)
 	}
 
-	members, err := s.getAllRegisteredMembers(chat) 
+	members, err := s.getAllRegisteredMembers(chat)
 	if err != nil {
 		return fmt.Errorf("Can't get members of chat: %w", err)
 	}
@@ -82,9 +82,9 @@ func makeKeyboardForSplit(authorID int64, users []usecase.UserInfo, amount int64
 
 	rows := make([]telebot.Row, MaxUsersInColumn)
 	for i, user := range users {
-		row_i := i%MaxUsersInColumn
+		row_i := i % MaxUsersInColumn
 		col_i := len(rows[row_i])
-		
+
 		btn, err := makeUserButton(&user, row_i, col_i)
 		if err != nil {
 			return nil, fmt.Errorf("Can't create selector button: %w", err)
@@ -98,7 +98,7 @@ func makeKeyboardForSplit(authorID int64, users []usecase.UserInfo, amount int64
 	if err != nil {
 		return nil, fmt.Errorf("Can't create OK button for split")
 	}
-	rows = append(rows, telebot.Row{ okBtn })
+	rows = append(rows, telebot.Row{okBtn})
 
 	selector.Inline(rows...)
 	return &selector, nil
@@ -113,15 +113,15 @@ func userInfoScreenName(ui *usecase.UserInfo) string {
 }
 
 type okBtnData struct {
-	CollectorID int64 `json:"id"`
-	Amount int64 `json:"amount"`
+	CollectorID int64  `json:"id"`
+	Amount      int64  `json:"amount"`
 	Description string `json:"desc"`
 }
 
 func createOkButton(collectorID int64, amount int64, description string) (telebot.Btn, error) {
 	data := okBtnData{
 		CollectorID: collectorID,
-		Amount: amount,
+		Amount:      amount,
 		Description: description,
 	}
 
@@ -137,16 +137,16 @@ func createOkButton(collectorID int64, amount int64, description string) (telebo
 }
 
 type selectorBtnData struct {
-	Chosen bool `json:"chosen"`
+	Chosen         bool   `json:"chosen"`
 	UserScreenName string `json:"sn"`
-	RowIndex int `json:"i"`
-	ColumnIndex int `json:"j"`
-	TelegramID int64 `json:"id"`
+	RowIndex       int    `json:"i"`
+	ColumnIndex    int    `json:"j"`
+	TelegramID     int64  `json:"id"`
 }
 
 func (data selectorBtnData) Text() string {
 	text := data.UserScreenName
-	if (data.Chosen) {
+	if data.Chosen {
 		text += DeselectUserSymbol
 	} else {
 		text += SelectUserSymbol
@@ -166,11 +166,11 @@ func makeUserButton(user *usecase.UserInfo, i int, j int) (telebot.Btn, error) {
 	}
 
 	data := selectorBtnData{
-		Chosen: false,
+		Chosen:         false,
 		UserScreenName: userInfoScreenName(user),
-		RowIndex: i,
-		ColumnIndex: j,
-		TelegramID: tgID,
+		RowIndex:       i,
+		ColumnIndex:    j,
+		TelegramID:     tgID,
 	}
 
 	dataRaw, err := json.Marshal(data)
@@ -178,7 +178,6 @@ func makeUserButton(user *usecase.UserInfo, i int, j int) (telebot.Btn, error) {
 		return telebot.Btn{}, err
 	}
 
-	
 	return telebot.Btn{
 		Text: data.Text(),
 		Data: string(dataRaw),
@@ -188,7 +187,8 @@ func makeUserButton(user *usecase.UserInfo, i int, j int) (telebot.Btn, error) {
 type userRecipient struct {
 	usecase.UserInfo
 }
-func (u userRecipient) Recipient() string {	
+
+func (u userRecipient) Recipient() string {
 	return u.TelegramUserID
 }
 
@@ -263,7 +263,7 @@ func (s *Service) onCallback(c telebot.Context) error {
 	pressedBtn := markup.InlineKeyboard[data.RowIndex][data.ColumnIndex]
 	pressedBtn.Data = string(newDataBytes)
 	pressedBtn.Text = data.Text()
-	
+
 	markup.InlineKeyboard[data.RowIndex][data.ColumnIndex] = pressedBtn
 
 	c.Bot().EditReplyMarkup(cb, markup)
@@ -288,7 +288,7 @@ func (s *Service) completeSplit(c telebot.Context) error {
 	for i, row := range keyboard {
 		for _, btn := range row {
 
-			if i == len(keyboard) - 1 {
+			if i == len(keyboard)-1 {
 				// OK button
 				continue
 			}
@@ -310,13 +310,12 @@ func (s *Service) completeSplit(c telebot.Context) error {
 		return nil
 	}
 
-
 	req := usecase.SplitDebtRequest{
-		CollectorID: okData.CollectorID,
-		DebtorIDs: debtorIDs,
-		ChatID: c.Chat().ID,
-		TotalAmount: okData.Amount,
-		Description: okData.Description,
+		TelegramCollectorID: okData.CollectorID,
+		TelegramDebtorIDs:   debtorIDs,
+		TelegramChatID:      c.Chat().ID,
+		TotalAmount:         okData.Amount,
+		Description:         okData.Description,
 	}
 
 	if err := s.Usecase.SplitDebt(context.TODO(), req); err != nil {
@@ -337,7 +336,7 @@ func (s *Service) completeSplit(c telebot.Context) error {
 
 func getOkData(c telebot.Context) (okBtnData, error) {
 	keyboard := c.Callback().Message.ReplyMarkup.InlineKeyboard
-	okDataStr := keyboard[len(keyboard) - 1][0].Data
+	okDataStr := keyboard[len(keyboard)-1][0].Data
 	okData := okBtnData{}
 	if err := json.Unmarshal([]byte(okDataStr), &okData); err != nil {
 		return okBtnData{}, fmt.Errorf("Can't parse ok button data: %w", err)
