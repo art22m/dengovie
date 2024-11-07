@@ -41,6 +41,7 @@ func (s *Service) ReturnSelect(c telebot.Context) error {
 	}
 
 	c.Send(fmt.Sprintf("@%s вернул(-a) %d рублей @%s", c.Sender().Username, data.Amount, data.UserScreenName))
+	c.Bot().Delete(cb.Message)
 	return nil
 }
 
