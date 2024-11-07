@@ -40,7 +40,7 @@ func (s *Service) ReturnSelect(c telebot.Context) error {
 		return fmt.Errorf("Errors during usecase: %w", err)
 	}
 
-	c.Send(fmt.Sprintf("@%s вернул(-a) %d рублей @%s", c.Sender().Username, data.Amount, data.UserScreenName))
+	c.Send(fmt.Sprintf("@%s вернул(-a) %d рублей @%s", c.Sender().Username, data.Amount / 100, data.UserScreenName))
 	c.Bot().Delete(cb.Message)
 	return nil
 }
