@@ -17,6 +17,7 @@ type UsersRepo interface {
 
 type DebtsRepo interface {
 	List(ctx context.Context, collectorID *int64, chatID *int64) ([]*models.Debt, error)
+	ClearTX(ctx context.Context, tx pgx.Tx, chatID int64) error
 	Delete(ctx context.Context, collectorID, debtorID, chatID int64) (bool, error)
 	CreateTX(ctx context.Context, tx pgx.Tx, debt *models.Debt) error
 	GetTX(ctx context.Context, tx pgx.Tx, collectorID, debtorID, chatID int64) (*models.Debt, error)

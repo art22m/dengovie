@@ -150,7 +150,6 @@ func (data selectorBtnData) Text() string {
 		text += SelectUserSymbol
 	} else {
 		text += DeselectUserSymbol
-		
 	}
 
 	return text

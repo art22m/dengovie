@@ -59,4 +59,5 @@ func (s *Service) BindBotHandlers() {
 	s.bindRegisterHandlers()
 	s.bindListDebts()
 	s.bindSplitHandlers()
+	s.bindOptimizeDebts()
 }

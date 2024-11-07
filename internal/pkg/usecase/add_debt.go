@@ -18,9 +18,9 @@ type AddDebtRequest struct {
 	Description string
 }
 
-func (uc *UseCase) AddDebt(ctx context.Context, req AddDebtRequest) error {
+func (uc *UseCase) AddDebt(ctx context.Context, req AddDebtRequest, logEvent bool) error {
 	err := pgx.BeginFunc(ctx, uc.db, func(tx pgx.Tx) error {
-		return uc.addDebtTX(ctx, tx, req)
+		return uc.addDebtTX(ctx, tx, req, logEvent)
 	})
 	if err != nil {
 		return errors.Wrap(err, "failed to add debt")
@@ -29,7 +29,7 @@ func (uc *UseCase) AddDebt(ctx context.Context, req AddDebtRequest) error {
 	return nil
 }
 
-func (uc *UseCase) addDebtTX(ctx context.Context, tx pgx.Tx, req AddDebtRequest) error {
+func (uc *UseCase) addDebtTX(ctx context.Context, tx pgx.Tx, req AddDebtRequest, logEvent bool) error {
 	collectorUser, err := uc.usersRepo.Get(ctx, req.CollectorID)
 	switch {
 	case errors.Is(err, store.UserNotFound):

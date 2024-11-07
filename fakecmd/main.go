@@ -2,10 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
-
-	"github.com/samber/lo"
 
 	"github.com/art22m/dengovie/internal/pkg/store"
 	"github.com/art22m/dengovie/internal/pkg/store/repository/pg"
@@ -69,16 +66,21 @@ func main() {
 	//	log.Fatal(err)
 	//}
 
-	resp, err := useCase.ListDebts(ctx, usecase.ListDebtsRequest{
-		UserID: 42,
-		ChatID: 4,
-	})
+	//resp, err := useCase.ListDebts(ctx, usecase.ListDebtsRequest{
+	//	UserID: 42,
+	//	ChatID: 4,
+	//})
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//fmt.Println("!!!", lo.FromPtr(resp.CollectorTelegramAlias), resp.CollectorTelegramID)
+	//for _, info := range resp.DebtsInfo {
+	//	fmt.Println(lo.FromPtr(info.DebtorTelegramAlias), info.DebtorTelegramID, info.Amount, info.LastModified)
+	//}
+
+	err = useCase.OptimizeDebts(ctx, -4563750727)
 	if err != nil {
 		log.Fatal(err)
-	}
-	fmt.Println("!!!", lo.FromPtr(resp.CollectorTelegramAlias), resp.CollectorTelegramID)
-	for _, info := range resp.DebtsInfo {
-		fmt.Println(lo.FromPtr(info.DebtorTelegramAlias), info.DebtorTelegramID, info.Amount, info.LastModified)
 	}
 
 	//allUsers, err := useCase.ListAllUsers(ctx)

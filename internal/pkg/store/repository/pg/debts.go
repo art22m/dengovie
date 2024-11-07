@@ -28,6 +28,14 @@ func (r *DebtRepository) CreateTX(ctx context.Context, tx pgx.Tx, debt *models.D
 	return err
 }
 
+func (r *DebtRepository) ClearTX(ctx context.Context, tx pgx.Tx, chatID int64) error {
+	q := "DELETE FROM debts WHERE chat_id = $1"
+	_, err := r.db.ExecTX(
+		ctx, tx, q, chatID,
+	)
+	return err
+}
+
 func (r *DebtRepository) GetTX(ctx context.Context, tx pgx.Tx, collectorID, debtorID, chatID int64) (*models.Debt, error) {
 	q := "SELECT collector_id, debtor_id, chat_id, amount, updated_at, created_at FROM debts WHERE collector_id = $1 AND debtor_id = $2 AND chat_id = $3 FOR UPDATE"
 	debts := make([]*models.Debt, 0)

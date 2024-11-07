@@ -31,7 +31,7 @@ func (uc *UseCase) SplitDebt(ctx context.Context, req SplitDebtRequest) error {
 				Amount:      amountForEach,
 				Description: req.Description,
 			}
-			err := uc.addDebtTX(ctx, tx, addReq)
+			err := uc.addDebtTX(ctx, tx, addReq, true)
 			if err != nil {
 				return err
 			}
