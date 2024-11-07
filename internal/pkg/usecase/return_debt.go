@@ -44,16 +44,28 @@ func (uc *UseCase) ReturnDebt(ctx context.Context, req ReturnDebtRequest) error 
 			return nil
 		}
 
-		collector.Amount = existingDebt.Amount - req.Amount
-		_, err = uc.debtsRepo.UpdateTX(ctx, tx, collector)
-		if err != nil {
-			return errors.Wrap(err, "failed to update debt")
-		}
+		if existingDebt.Amount == req.Amount {
+			_, err = uc.debtsRepo.DeleteTX(ctx, tx, collector.CollectorID, collector.DebtorID, collector.ChatID)
+			if err != nil {
+				return errors.Wrap(err, "failed to delete debt")
+			}
 
-		debtor.Amount = -collector.Amount
-		_, err = uc.debtsRepo.UpdateTX(ctx, tx, debtor)
-		if err != nil {
-			return errors.Wrap(err, "failed to update debt")
+			_, err = uc.debtsRepo.DeleteTX(ctx, tx, debtor.CollectorID, debtor.DebtorID, debtor.ChatID)
+			if err != nil {
+				return errors.Wrap(err, "failed to delete debt")
+			}
+		} else {
+			collector.Amount = existingDebt.Amount - req.Amount
+			_, err = uc.debtsRepo.UpdateTX(ctx, tx, collector)
+			if err != nil {
+				return errors.Wrap(err, "failed to update debt")
+			}
+
+			debtor.Amount = -collector.Amount
+			_, err = uc.debtsRepo.UpdateTX(ctx, tx, debtor)
+			if err != nil {
+				return errors.Wrap(err, "failed to update debt")
+			}
 		}
 
 		if err = uc.eventsRepo.CreateTX(ctx, tx, event); err != nil {

@@ -88,3 +88,11 @@ func (r *DebtRepository) Delete(ctx context.Context, collectorID, debtorID, chat
 	)
 	return result.RowsAffected() > 0, err
 }
+
+func (r *DebtRepository) DeleteTX(ctx context.Context, tx pgx.Tx, collectorID, debtorID, chatID int64) (bool, error) {
+	q := "DELETE FROM debts WHERE collector_id = $2 AND debtor_id = $3 AND chat_id = $4"
+	result, err := r.db.ExecTX(
+		ctx, tx, q, collectorID, debtorID, chatID,
+	)
+	return result.RowsAffected() > 0, err
+}
