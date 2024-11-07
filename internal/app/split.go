@@ -59,7 +59,7 @@ func validateSplitArgs(c telebot.Context) (int64, string, error) {
 	args := c.Args()
 
 	if len(args) != 2 {
-		c.Bot().Reply(c.Message(), "Expected 2 args for split")
+		c.Bot().Reply(c.Message(), "Не хватает аргументов, используй /split <сумма> <описание>")
 		return 0, "", fmt.Errorf("Expected 2 args for split, got %d", len(args))
 	}
 
@@ -147,9 +147,10 @@ type selectorBtnData struct {
 func (data selectorBtnData) Text() string {
 	text := data.UserScreenName
 	if data.Chosen {
-		text += DeselectUserSymbol
-	} else {
 		text += SelectUserSymbol
+	} else {
+		text += DeselectUserSymbol
+		
 	}
 
 	return text
@@ -309,7 +310,7 @@ func (s *Service) completeSplit(c telebot.Context) error {
 		CollectorID: okData.CollectorID,
 		DebtorIDs:   debtorIDs,
 		ChatID:      c.Chat().ID,
-		TotalAmount: okData.Amount,
+		TotalAmount: okData.Amount * 100,
 		Description: okData.Description,
 	}
 
@@ -317,7 +318,7 @@ func (s *Service) completeSplit(c telebot.Context) error {
 		return fmt.Errorf("Error in usecase split debt: %w", err)
 	}
 
-	notification := fmt.Sprintf("Новый долг в %d рублей распределен между", req.TotalAmount)
+	notification := fmt.Sprintf("Новый долг в %d рублей распределен между", okData.Amount)
 	for i := range debtorIDs {
 		notification += fmt.Sprintf(" [%s](tg://user?id=%d)", debtorScreenames[i], debtorIDs[i])
 	}

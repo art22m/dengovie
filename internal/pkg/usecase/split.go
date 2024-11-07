@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/pkg/errors"
@@ -16,6 +17,7 @@ type SplitDebtRequest struct {
 }
 
 func (uc *UseCase) SplitDebt(ctx context.Context, req SplitDebtRequest) error {
+	fmt.Println("start split", req.TotalAmount)
 	amountForEach := req.TotalAmount / int64(len(req.DebtorIDs))
 	err := pgx.BeginFunc(ctx, uc.db, func(tx pgx.Tx) error {
 		for _, debtorID := range req.DebtorIDs {

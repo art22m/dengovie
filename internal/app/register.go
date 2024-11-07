@@ -17,6 +17,7 @@ var (
 func (s *Service) Register(c telebot.Context) error {
 	chat := c.Chat()
 	if chat == nil || chat.Type != telebot.ChatPrivate {
+		c.Reply("Для регистрации напиши боту в личные сообщения")
 		s.Log.Printf("/register not in a private chat '%s'. Author: %d", chat.Title, c.Sender().ID)
 		return nil
 	}

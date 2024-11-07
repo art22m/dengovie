@@ -9,6 +9,7 @@ import (
 )
 
 func CreateDatabase(ctx context.Context) (*pgxpool.Pool, error) {
+	fmt.Println(generateDsn())
 	pool, err := pgxpool.New(ctx, generateDsn())
 	if err != nil {
 		return nil, err

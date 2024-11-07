@@ -58,7 +58,9 @@ func (s *Service) buildResponse(resp usecase.ListDebtsResponse) string {
 	}
 
 	builder.Write([]byte(fmt.Sprintf("Список долгов для %s\n\n", collectorMention)))
-
+	if len(resp.DebtsInfo) == 0 {
+		builder.WriteString("Тебе не должны и ты никому не должен :)")
+	}
 	for i, debt := range resp.DebtsInfo {
 		debtorMention := fmt.Sprintf("[unknown](tg://user?id=%s)", debt.DebtorTelegramID)
 		if debt.DebtorTelegramAlias != nil {
