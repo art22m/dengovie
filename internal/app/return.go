@@ -33,7 +33,7 @@ func (s *Service) ReturnSelect(c telebot.Context) error {
 		CollectorID: data.TelegramID,
 		DebtorID:    c.Sender().ID,
 		ChatID:      c.Chat().ID,
-		Amount:      data.Amount * 100,
+		Amount:      data.Amount,
 	}
 
 	if err := s.Usecase.ReturnDebt(context.TODO(), req); err != nil {
@@ -41,7 +41,7 @@ func (s *Service) ReturnSelect(c telebot.Context) error {
 		return fmt.Errorf("Errors during usecase: %w", err)
 	}
 
-	c.Send(fmt.Sprintf("@%s вернул(-a) %d рублей @%s", c.Sender().Username, data.Amount, data.UserScreenName))
+	c.Send(fmt.Sprintf("@%s вернул(-a) %d,%d рублей @%s", c.Sender().Username, data.Amount/100, data.Amount%100, data.UserScreenName))
 	c.Bot().Delete(cb.Message)
 	return nil
 }
@@ -99,7 +99,7 @@ type returnBtnData struct {
 }
 
 func (data returnBtnData) Text() string {
-	return fmt.Sprintf("%s (%d рублей)", data.UserScreenName, data.Amount)
+	return fmt.Sprintf("%s (%d,%d рублей)", data.UserScreenName, data.Amount/100, data.Amount%100)
 }
 
 func makeUserButtonReturn(info usecase.DebtInfo) (telebot.Btn, error) {
@@ -107,7 +107,7 @@ func makeUserButtonReturn(info usecase.DebtInfo) (telebot.Btn, error) {
 		CallbackData:   CallbackData{Type: ButtonDataReturn},
 		UserScreenName: *info.DebtorTelegramAlias,
 		TelegramID:     info.DebtorTelegramID,
-		Amount:         -info.Amount / 100,
+		Amount:         -info.Amount,
 	}
 
 	dataRaw, err := json.Marshal(data)
