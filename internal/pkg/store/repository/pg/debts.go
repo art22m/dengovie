@@ -82,7 +82,7 @@ func (r *DebtRepository) List(ctx context.Context, collectorID *int64, chatID *i
 }
 
 func (r *DebtRepository) Delete(ctx context.Context, collectorID, debtorID, chatID int64) (bool, error) {
-	q := "DELETE FROM debts WHERE collector_id = $2 AND debtor_id = $3 AND chat_id = $4"
+	q := "DELETE FROM debts WHERE collector_id = $1 AND debtor_id = $2 AND chat_id = $3"
 	result, err := r.db.Exec(
 		ctx, q, collectorID, debtorID, chatID,
 	)
@@ -90,7 +90,7 @@ func (r *DebtRepository) Delete(ctx context.Context, collectorID, debtorID, chat
 }
 
 func (r *DebtRepository) DeleteTX(ctx context.Context, tx pgx.Tx, collectorID, debtorID, chatID int64) (bool, error) {
-	q := "DELETE FROM debts WHERE collector_id = $2 AND debtor_id = $3 AND chat_id = $4"
+	q := "DELETE FROM debts WHERE collector_id = $1 AND debtor_id = $2 AND chat_id = $3"
 	result, err := r.db.ExecTX(
 		ctx, tx, q, collectorID, debtorID, chatID,
 	)
