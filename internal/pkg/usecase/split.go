@@ -19,6 +19,9 @@ func (uc *UseCase) SplitDebt(ctx context.Context, req SplitDebtRequest) error {
 	amountForEach := req.TotalAmount / int64(len(req.DebtorIDs))
 	err := pgx.BeginFunc(ctx, uc.db, func(tx pgx.Tx) error {
 		for _, debtorID := range req.DebtorIDs {
+			if debtorID == req.CollectorID {
+				continue
+			}
 			addReq := AddDebtRequest{
 				CollectorID: req.CollectorID,
 				DebtorID:    debtorID,
