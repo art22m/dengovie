@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/art22m/dengovie/internal/pkg/usecase"
+	"github.com/pkg/errors"
 	"gopkg.in/telebot.v4"
 )
 
@@ -19,8 +20,15 @@ func (s *Service) RegisterChat(c telebot.Context) error {
 		TelegramChatID: strconv.FormatInt(chat.ID, 10),
 		Info:           chat.Description,
 	}); err != nil {
-		c.Send("Не удалось добавить бота в чат")
-		return err
+		switch {
+		case errors.Is(err, usecase.ErrChatAlreadyExists):
+			c.Send("Бот уже добавлен в чат")
+			return nil
+		default:
+			c.Send("Не удалось добавить бота в чат")
+			return err
+		}
+
 	}
 
 	c.Send("Бот успешно добавлен в чат")
