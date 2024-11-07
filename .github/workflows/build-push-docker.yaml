@@ -7,6 +7,8 @@ jobs:
   docker-build-push:
     runs-on: ubuntu-latest
     steps:
+      - name: Test envs
+        run: echo ${{ env.PG_HOST }}
       - name: Generate tag
         run: |
           echo "TAG=`echo ${GITHUB_SHA::7}`" >> "$GITHUB_ENV"
