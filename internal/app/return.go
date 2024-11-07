@@ -106,7 +106,7 @@ func makeUserButtonReturn(info usecase.DebtInfo) (telebot.Btn, error) {
 		CallbackData: CallbackData{ Type: ButtonDataReturn },
 		UserScreenName: *info.DebtorTelegramAlias,
 		TelegramID: info.DebtorTelegramID,
-		Amount: -info.Amount,
+		Amount: -info.Amount / 100,
 	}
 
 	dataRaw, err := json.Marshal(data)
