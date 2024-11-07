@@ -81,12 +81,7 @@ func makeKeyboardForSplit(authorID int64, users []usecase.UserInfo, amount int64
 	selector := telebot.ReplyMarkup{}
 
 	rows := make([]telebot.Row, MaxUsersInColumn)
-	i := 0
-	for _, user := range users {
-		if user.TelegramUserID == strconv.FormatInt(authorID, 10) {
-			continue
-		}
-
+	for i, user := range users {
 		row_i := i%MaxUsersInColumn
 		col_i := len(rows[row_i])
 		
@@ -228,12 +223,24 @@ func (s *Service) getAllRegisteredMembers(chat *telebot.Chat) ([]usecase.UserInf
 func (s *Service) onCallback(c telebot.Context) error {
 	cb := c.Callback()
 
+	okData, err := getOkData(c)
+	if err != nil {
+		return fmt.Errorf("error getting okData: %w", err)
+	}
+
+	if cb.Sender.ID != okData.CollectorID {
+		c.RespondAlert("Это не ваш сплит")
+		return nil
+	}
+
 	// TODO: kostyl
 	if strings.Contains(c.Callback().Data, "\"amount\":") {
 		err := s.completeSplit(c)
 		if err != nil {
 			c.Send("Sorry, can't split right now")
 		}
+
+		c.Bot().Delete(c.Callback().Message)
 		return nil
 	}
 
@@ -248,7 +255,6 @@ func (s *Service) onCallback(c telebot.Context) error {
 		return err
 	}
 
-
 	markup := cb.Message.ReplyMarkup
 	if markup == nil {
 		return errors.New("Empty markup")
@@ -261,6 +267,7 @@ func (s *Service) onCallback(c telebot.Context) error {
 	markup.InlineKeyboard[data.RowIndex][data.ColumnIndex] = pressedBtn
 
 	c.Bot().EditReplyMarkup(cb, markup)
+	c.RespondText("Ok")
 	return nil
 }
 
@@ -322,6 +329,17 @@ func (s *Service) completeSplit(c telebot.Context) error {
 	c.Send(notification)
 
 	return nil
+}
+
+func getOkData(c telebot.Context) (okBtnData, error) {
+	keyboard := c.Callback().Message.ReplyMarkup.InlineKeyboard
+	okDataStr := keyboard[len(keyboard) - 1][0].Data
+	okData := okBtnData{}
+	if err := json.Unmarshal([]byte(okDataStr), &okData); err != nil {
+		return okBtnData{}, fmt.Errorf("Can't parse ok button data: %w", err)
+	}
+
+	return okData, nil
 }
 
 func (s *Service) bindSplitHandlers() {
