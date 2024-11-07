@@ -20,5 +20,5 @@
 ![img.png](images/db.png)
 
 # Ссылки
-Надо подредачить
-- [Презентация](https://github.com)
+Страничка проекта на wiki [[link]](https://cs-uni.ru/index.php?title=DDF24_Деньговье)
+
