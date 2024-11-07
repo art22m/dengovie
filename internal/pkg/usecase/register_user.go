@@ -10,13 +10,13 @@ import (
 )
 
 type RegisterUserRequest struct {
-	TelegramUserID string
-	PhoneNumber    string
-	TelegramAlias  *string
+	UserID      int64
+	PhoneNumber string
+	Alias       *string
 }
 
 func (uc *UseCase) RegisterUser(ctx context.Context, req RegisterUserRequest) error {
-	_, err := uc.usersRepo.GetByTelegramUserID(ctx, req.TelegramUserID)
+	_, err := uc.usersRepo.Get(ctx, req.UserID)
 	switch {
 	case errors.Is(err, store.UserNotFound):
 		// ok
@@ -27,9 +27,9 @@ func (uc *UseCase) RegisterUser(ctx context.Context, req RegisterUserRequest) er
 	}
 
 	user := &models.User{
-		TelegramUserID: req.TelegramUserID,
-		PhoneNumber:    req.PhoneNumber,
-		TelegramAlias:  req.TelegramAlias,
+		UserID:      req.UserID,
+		PhoneNumber: req.PhoneNumber,
+		Alias:       req.Alias,
 	}
 	if err = uc.usersRepo.Create(ctx, user); err != nil {
 		return errors.Wrap(err, "failed to register user")

@@ -6,10 +6,10 @@ import (
 )
 
 type UserInfo struct {
-	TelegramUserID string    `json:"tg_user_id" db:"tg_user_id"`
-	PhoneNumber    string    `json:"phone_number" db:"phone_number"`
-	TelegramAlias  *string   `json:"tg_alias" db:"tg_alias"`
-	CreatedAt      time.Time `json:"created_at" db:"created_at"`
+	UserID      int64
+	PhoneNumber string
+	Alias       *string
+	CreatedAt   time.Time
 }
 
 func (uc *UseCase) ListAllUsers(ctx context.Context) ([]UserInfo, error) {
@@ -21,10 +21,10 @@ func (uc *UseCase) ListAllUsers(ctx context.Context) ([]UserInfo, error) {
 	res := make([]UserInfo, 0, len(users))
 	for _, user := range users {
 		res = append(res, UserInfo{
-			TelegramUserID: user.TelegramUserID,
-			PhoneNumber:    user.PhoneNumber,
-			TelegramAlias:  user.TelegramAlias,
-			CreatedAt:      user.CreatedAt,
+			UserID:      user.UserID,
+			PhoneNumber: user.PhoneNumber,
+			Alias:       user.Alias,
+			CreatedAt:   user.CreatedAt,
 		})
 	}
 	return res, nil

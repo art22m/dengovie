@@ -8,8 +8,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/art22m/dengovie/internal/pkg/usecase"
 	"gopkg.in/telebot.v4"
+
+	"github.com/art22m/dengovie/internal/pkg/usecase"
 )
 
 const (
@@ -105,11 +106,10 @@ func makeKeyboardForSplit(authorID int64, users []usecase.UserInfo, amount int64
 }
 
 func userInfoScreenName(ui *usecase.UserInfo) string {
-	if ui.TelegramAlias != nil {
-		return *ui.TelegramAlias
+	if ui.Alias != nil {
+		return *ui.Alias
 	}
-
-	return ui.TelegramUserID
+	return strconv.FormatInt(ui.UserID, 10)
 }
 
 type okBtnData struct {
@@ -160,17 +160,12 @@ func (data *selectorBtnData) Press() {
 }
 
 func makeUserButton(user *usecase.UserInfo, i int, j int) (telebot.Btn, error) {
-	tgID, err := strconv.ParseInt(user.TelegramUserID, 10, 64)
-	if err != nil {
-		return telebot.Btn{}, err
-	}
-
 	data := selectorBtnData{
 		Chosen:         false,
 		UserScreenName: userInfoScreenName(user),
 		RowIndex:       i,
 		ColumnIndex:    j,
-		TelegramID:     tgID,
+		TelegramID:     user.UserID,
 	}
 
 	dataRaw, err := json.Marshal(data)
@@ -189,7 +184,7 @@ type userRecipient struct {
 }
 
 func (u userRecipient) Recipient() string {
-	return u.TelegramUserID
+	return strconv.FormatInt(u.UserID, 10)
 }
 
 func isMember(m *telebot.ChatMember) bool {
@@ -211,7 +206,7 @@ func (s *Service) getAllRegisteredMembers(chat *telebot.Chat) ([]usecase.UserInf
 			return nil, err
 		}
 
-		s.Log.Printf("Check user %s is chat member of %d - %t", *user.TelegramAlias, chat.ID, isMember(member))
+		s.Log.Printf("Check user %s is chat member of %d - %t", *user.Alias, chat.ID, isMember(member))
 
 		if isMember(member) {
 			result = append(result, user)
@@ -311,11 +306,11 @@ func (s *Service) completeSplit(c telebot.Context) error {
 	}
 
 	req := usecase.SplitDebtRequest{
-		TelegramCollectorID: okData.CollectorID,
-		TelegramDebtorIDs:   debtorIDs,
-		TelegramChatID:      c.Chat().ID,
-		TotalAmount:         okData.Amount,
-		Description:         okData.Description,
+		CollectorID: okData.CollectorID,
+		DebtorIDs:   debtorIDs,
+		ChatID:      c.Chat().ID,
+		TotalAmount: okData.Amount,
+		Description: okData.Description,
 	}
 
 	if err := s.Usecase.SplitDebt(context.TODO(), req); err != nil {

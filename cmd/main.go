@@ -23,9 +23,8 @@ func main() {
 	debtsRepo := pg.NewDebts(store.NewDatabase(db))
 	eventsRepo := pg.NewEvents(store.NewDatabase(db))
 	usersRepo := pg.NewUsers(store.NewDatabase(db))
-	chatsRepo := pg.NewChats(store.NewDatabase(db))
 
-	useCase := usecase.NewUseCase(db, debtsRepo, eventsRepo, usersRepo, chatsRepo)
+	useCase := usecase.NewUseCase(db, debtsRepo, eventsRepo, usersRepo)
 
 	service := app.NewService(
 		config.Telegram{

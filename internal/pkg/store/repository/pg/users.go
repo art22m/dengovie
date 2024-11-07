@@ -18,10 +18,10 @@ func NewUsers(db store.DatabaseOperations) *UsersRepo {
 }
 
 func (r *UsersRepo) Create(ctx context.Context, user *models.User) error {
-	q := "INSERT INTO users(tg_user_id, phone_number, tg_alias) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING"
+	q := "INSERT INTO users(user_id, phone_number, alias) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING"
 	_, err := r.db.Exec(
 		ctx, q,
-		user.TelegramUserID, user.PhoneNumber, user.TelegramAlias,
+		user.UserID, user.PhoneNumber, user.Alias,
 	)
 	return err
 }
@@ -33,21 +33,8 @@ func (r *UsersRepo) Delete(ctx context.Context, id int64) (bool, error) {
 	return result.RowsAffected() > 0, err
 }
 
-func (r *UsersRepo) GetByTelegramUserID(ctx context.Context, id string) (*models.User, error) {
-	q := "SELECT user_id, tg_user_id, phone_number, tg_alias, created_at FROM users WHERE tg_user_id = $1"
-	users := make([]*models.User, 0)
-	err := r.db.Select(ctx, &users, q, id)
-	if err != nil {
-		return nil, err
-	}
-	if len(users) == 0 {
-		return nil, store.UserNotFound
-	}
-	return users[0], err
-}
-
 func (r *UsersRepo) Get(ctx context.Context, id int64) (*models.User, error) {
-	q := "SELECT user_id, tg_user_id, phone_number, tg_alias, created_at FROM users WHERE user_id = $1"
+	q := "SELECT user_id, phone_number, alias, created_at FROM users WHERE user_id = $1"
 	users := make([]*models.User, 0)
 	err := r.db.Select(ctx, &users, q, id)
 	if err != nil {
@@ -60,7 +47,7 @@ func (r *UsersRepo) Get(ctx context.Context, id int64) (*models.User, error) {
 }
 
 func (r *UsersRepo) List(ctx context.Context) ([]*models.User, error) {
-	q := "SELECT user_id, tg_user_id, phone_number, tg_alias, created_at FROM users"
+	q := "SELECT user_id, phone_number, alias, created_at FROM users"
 	users := make([]*models.User, 0)
 	err := r.db.Select(ctx, &users, q)
 	if err != nil {

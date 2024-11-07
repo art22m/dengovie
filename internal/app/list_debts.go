@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -22,8 +21,8 @@ func (s *Service) ListDebts(c telebot.Context) error {
 
 	resp, err := s.Usecase.ListDebts(context.Background(),
 		usecase.ListDebtsRequest{
-			TelegramUserID: strconv.FormatInt(c.Sender().ID, 10),
-			TelegramChatID: strconv.FormatInt(chat.ID, 10),
+			UserID: c.Sender().ID,
+			ChatID: chat.ID,
 		},
 	)
 
@@ -35,7 +34,7 @@ func (s *Service) ListDebts(c telebot.Context) error {
 		c.Send("Неизвестный чат!")
 		return err
 	case err != nil:
-		c.Send("Что-то пошло не так...")
+		c.Send(fmt.Sprintf("Что-то пошло не так... (%v)", err))
 		return err
 	}
 

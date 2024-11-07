@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/pkg/errors"
@@ -12,11 +11,11 @@ import (
 )
 
 type AddDebtRequest struct {
-	TelegramCollectorID int64
-	TelegramDebtorID    int64
-	TelegramChatID      int64
-	Amount              int64
-	Description         string
+	CollectorID int64
+	DebtorID    int64
+	ChatID      int64
+	Amount      int64
+	Description string
 }
 
 func (uc *UseCase) AddDebt(ctx context.Context, req AddDebtRequest) error {
@@ -31,15 +30,7 @@ func (uc *UseCase) AddDebt(ctx context.Context, req AddDebtRequest) error {
 }
 
 func (uc *UseCase) addDebtTX(ctx context.Context, tx pgx.Tx, req AddDebtRequest) error {
-	chat, err := uc.chatsRepo.GetByTelegramChatID(ctx, strconv.FormatInt(req.TelegramChatID, 10))
-	switch {
-	case errors.Is(err, store.ChatNotFound):
-		return ErrChatNotFound
-	case err != nil:
-		return errors.Wrap(err, "failed to get chat")
-	}
-
-	collectorUser, err := uc.usersRepo.GetByTelegramUserID(ctx, strconv.FormatInt(req.TelegramCollectorID, 10))
+	collectorUser, err := uc.usersRepo.Get(ctx, req.CollectorID)
 	switch {
 	case errors.Is(err, store.UserNotFound):
 		return ErrUserNotFound
@@ -47,7 +38,7 @@ func (uc *UseCase) addDebtTX(ctx context.Context, tx pgx.Tx, req AddDebtRequest)
 		return errors.Wrap(err, "failed to get user")
 	}
 
-	debtorUser, err := uc.usersRepo.GetByTelegramUserID(ctx, strconv.FormatInt(req.TelegramDebtorID, 10))
+	debtorUser, err := uc.usersRepo.Get(ctx, req.DebtorID)
 	switch {
 	case errors.Is(err, store.UserNotFound):
 		return ErrUserNotFound
@@ -58,26 +49,26 @@ func (uc *UseCase) addDebtTX(ctx context.Context, tx pgx.Tx, req AddDebtRequest)
 	collector := &models.Debt{
 		CollectorID: collectorUser.UserID,
 		DebtorID:    debtorUser.UserID,
-		ChatID:      chat.ChatID,
+		ChatID:      req.ChatID,
 		Amount:      req.Amount,
 	}
 
 	debtor := &models.Debt{
 		CollectorID: debtorUser.UserID,
 		DebtorID:    collectorUser.UserID,
-		ChatID:      chat.ChatID,
+		ChatID:      req.ChatID,
 		Amount:      -req.Amount,
 	}
 
 	event := &models.Event{
 		CollectorID: collectorUser.UserID,
 		DebtorID:    debtorUser.UserID,
-		ChatID:      chat.ChatID,
+		ChatID:      req.ChatID,
 		Amount:      req.Amount,
 		Description: req.Description,
 	}
 
-	existingDebt, err := uc.debtsRepo.GetTX(ctx, tx, collectorUser.UserID, debtorUser.UserID, chat.ChatID)
+	existingDebt, err := uc.debtsRepo.GetTX(ctx, tx, collectorUser.UserID, debtorUser.UserID, req.ChatID)
 	switch {
 	case err == nil:
 	case errors.Is(err, store.DebtNotFound):

@@ -11,18 +11,18 @@ import (
 )
 
 type ListDebtsRequest struct {
-	TelegramUserID string
-	TelegramChatID string
+	UserID int64
+	ChatID int64
 }
 
 type ListDebtsResponse struct {
-	CollectorTelegramID    string
+	CollectorTelegramID    int64
 	CollectorTelegramAlias *string
 	DebtsInfo              []DebtInfo
 }
 
 type DebtInfo struct {
-	DebtorTelegramID    string
+	DebtorTelegramID    int64
 	DebtorTelegramAlias *string
 
 	Amount       int64
@@ -30,15 +30,7 @@ type DebtInfo struct {
 }
 
 func (uc *UseCase) ListDebts(ctx context.Context, req ListDebtsRequest) (*ListDebtsResponse, error) {
-	chat, err := uc.chatsRepo.GetByTelegramChatID(ctx, req.TelegramChatID)
-	switch {
-	case errors.Is(err, store.ChatNotFound):
-		return nil, ErrChatNotFound
-	case err != nil:
-		return nil, errors.Wrap(err, "failed to get chat")
-	}
-
-	collector, err := uc.usersRepo.GetByTelegramUserID(ctx, req.TelegramUserID)
+	collector, err := uc.usersRepo.Get(ctx, req.UserID)
 	switch {
 	case errors.Is(err, store.UserNotFound):
 		return nil, ErrUserNotFound
@@ -46,14 +38,14 @@ func (uc *UseCase) ListDebts(ctx context.Context, req ListDebtsRequest) (*ListDe
 		return nil, errors.Wrap(err, "failed to get user")
 	}
 
-	debts, err := uc.debtsRepo.List(ctx, &collector.UserID, &chat.ChatID)
+	debts, err := uc.debtsRepo.List(ctx, &req.UserID, &req.ChatID)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get collectors debts")
 	}
 
 	resp := ListDebtsResponse{
-		CollectorTelegramID:    collector.TelegramUserID,
-		CollectorTelegramAlias: collector.TelegramAlias,
+		CollectorTelegramID:    collector.UserID,
+		CollectorTelegramAlias: collector.Alias,
 		DebtsInfo:              make([]DebtInfo, len(debts)),
 	}
 	for i, debt := range debts {
@@ -66,8 +58,8 @@ func (uc *UseCase) ListDebts(ctx context.Context, req ListDebtsRequest) (*ListDe
 		}
 
 		resp.DebtsInfo[i] = DebtInfo{
-			DebtorTelegramID:    debtor.TelegramUserID,
-			DebtorTelegramAlias: debtor.TelegramAlias,
+			DebtorTelegramID:    debtor.UserID,
+			DebtorTelegramAlias: debtor.Alias,
 			Amount:              debt.Amount,
 			LastModified:        debt.UpdatedAt,
 		}

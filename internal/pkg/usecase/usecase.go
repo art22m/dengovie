@@ -12,7 +12,6 @@ type UseCase struct {
 	debtsRepo  repository.DebtsRepo
 	eventsRepo repository.EventsRepo
 	usersRepo  repository.UsersRepo
-	chatsRepo  repository.ChatsRepo
 }
 
 func NewUseCase(
@@ -20,13 +19,11 @@ func NewUseCase(
 	debtsRepo repository.DebtsRepo,
 	eventsRepo repository.EventsRepo,
 	usersRepo repository.UsersRepo,
-	chatsRepo repository.ChatsRepo,
 ) *UseCase {
 	return &UseCase{
 		db:         db,
 		debtsRepo:  debtsRepo,
 		eventsRepo: eventsRepo,
 		usersRepo:  usersRepo,
-		chatsRepo:  chatsRepo,
 	}
 }

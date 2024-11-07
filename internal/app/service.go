@@ -7,8 +7,9 @@ import (
 
 	"github.com/art22m/dengovie/internal/pkg/usecase"
 
-	"github.com/art22m/dengovie/internal/config"
 	tele "gopkg.in/telebot.v4"
+
+	"github.com/art22m/dengovie/internal/config"
 )
 
 type Service struct {
@@ -58,5 +59,4 @@ func (s *Service) BindBotHandlers() {
 	s.bindRegisterHandlers()
 	s.bindListDebts()
 	s.bindSplitHandlers()
-	s.bindRegisterChat()
 }

@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"errors"
-	"strconv"
 
 	"gopkg.in/telebot.v4"
 
@@ -43,9 +42,9 @@ func (s *Service) ShareContact(c telebot.Context) error {
 	}
 
 	req := usecase.RegisterUserRequest{
-		TelegramUserID: strconv.FormatInt(contact.UserID, 10),
-		PhoneNumber:    contact.PhoneNumber,
-		TelegramAlias:  &c.Sender().Username,
+		UserID:      contact.UserID,
+		PhoneNumber: contact.PhoneNumber,
+		Alias:       &c.Sender().Username,
 	}
 
 	if err := s.Usecase.RegisterUser(context.TODO(), req); err != nil {
