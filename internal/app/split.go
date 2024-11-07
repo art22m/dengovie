@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"strings"
 
 	"gopkg.in/telebot.v4"
 
@@ -86,7 +85,7 @@ func makeKeyboardForSplit(authorID int64, users []usecase.UserInfo, amount int64
 		row_i := i % MaxUsersInColumn
 		col_i := len(rows[row_i])
 
-		btn, err := makeUserButton(&user, row_i, col_i)
+		btn, err := makeUserButtonSplit(&user, row_i, col_i)
 		if err != nil {
 			return nil, fmt.Errorf("Can't create selector button: %w", err)
 		}
@@ -113,6 +112,7 @@ func userInfoScreenName(ui *usecase.UserInfo) string {
 }
 
 type okBtnData struct {
+	CallbackData
 	CollectorID int64  `json:"id"`
 	Amount      int64  `json:"amount"`
 	Description string `json:"desc"`
@@ -120,6 +120,7 @@ type okBtnData struct {
 
 func createOkButton(collectorID int64, amount int64, description string) (telebot.Btn, error) {
 	data := okBtnData{
+		CallbackData: CallbackData{ Type: ButtonDataSplitOk },
 		CollectorID: collectorID,
 		Amount:      amount,
 		Description: description,
@@ -137,7 +138,8 @@ func createOkButton(collectorID int64, amount int64, description string) (telebo
 }
 
 type selectorBtnData struct {
-	Chosen         bool   `json:"chosen"`
+	CallbackData
+	Chosen         bool   `json:"ch"`
 	UserScreenName string `json:"sn"`
 	RowIndex       int    `json:"i"`
 	ColumnIndex    int    `json:"j"`
@@ -159,8 +161,9 @@ func (data *selectorBtnData) Press() {
 	data.Chosen = !data.Chosen
 }
 
-func makeUserButton(user *usecase.UserInfo, i int, j int) (telebot.Btn, error) {
+func makeUserButtonSplit(user *usecase.UserInfo, i int, j int) (telebot.Btn, error) {
 	data := selectorBtnData{
+		CallbackData: CallbackData{ Type: ButtonDataSplitSelect },
 		Chosen:         false,
 		UserScreenName: userInfoScreenName(user),
 		RowIndex:       i,
@@ -215,7 +218,32 @@ func (s *Service) getAllRegisteredMembers(chat *telebot.Chat) ([]usecase.UserInf
 	return result, nil
 }
 
-func (s *Service) onCallback(c telebot.Context) error {
+func (s *Service) SplitOk(c telebot.Context) error {
+	cb := c.Callback()
+
+	okData, err := getOkData(c)
+	if err != nil {
+		return fmt.Errorf("Can't get ok data: %w", err)
+	} 
+
+	if cb.Sender.ID != okData.CollectorID {
+		c.RespondAlert("Это не ваш сплит")
+		return nil
+	}
+
+	err = s.completeSplit(c)
+	if err != nil {
+		c.Send("Sorry, can't split right now")
+		return err
+	}
+
+	c.Bot().Delete(c.Callback().Message)
+	return nil	
+}
+
+func (s *Service) SplitSelect(c telebot.Context) error {
+	s.Log.Println("In splitSelect")
+
 	cb := c.Callback()
 
 	okData, err := getOkData(c)
@@ -225,17 +253,6 @@ func (s *Service) onCallback(c telebot.Context) error {
 
 	if cb.Sender.ID != okData.CollectorID {
 		c.RespondAlert("Это не ваш сплит")
-		return nil
-	}
-
-	// TODO: kostyl
-	if strings.Contains(c.Callback().Data, "\"amount\":") {
-		err := s.completeSplit(c)
-		if err != nil {
-			c.Send("Sorry, can't split right now")
-		}
-
-		c.Bot().Delete(c.Callback().Message)
 		return nil
 	}
 
@@ -342,5 +359,4 @@ func getOkData(c telebot.Context) (okBtnData, error) {
 
 func (s *Service) bindSplitHandlers() {
 	s.Bot.Handle("/split", s.Split)
-	s.Bot.Handle(telebot.OnCallback, s.onCallback)
 }

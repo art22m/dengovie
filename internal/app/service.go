@@ -57,7 +57,9 @@ func provideBotApi(conf config.Telegram) (*tele.Bot, error) {
 
 func (s *Service) BindBotHandlers() {
 	s.bindRegisterHandlers()
+	s.bindCallbackHandlers()
 	s.bindListDebts()
 	s.bindSplitHandlers()
 	s.bindOptimizeDebts()
+	s.bindReturnHandlers()
 }
